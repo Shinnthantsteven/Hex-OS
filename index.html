@@ -442,7 +442,7 @@ window.hexGet=function(){return S};window.hexApply=function(o){for(var k in o)S[
 })();
 </script>
 <div id="login"><div class="lbox"><div class="lt">⬡ Hex OS</div><p id="lmsg" class="small">Checking login…</p>
-<form id="lf" hidden><input type="email" id="le" autocomplete="username" placeholder="Email" required><input type="password" id="lp" autocomplete="current-password" placeholder="Password" required><button type="submit">🔓 Sign in</button></form></div></div>
+<form id="lf" hidden><input type="text" id="le" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Username or email" required><input type="password" id="lp" autocomplete="current-password" placeholder="Password" required><button type="submit">🔓 Sign in</button></form></div></div>
 <button id="so" aria-label="Sign out" title="Sign out">🔒</button>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -461,7 +461,7 @@ onAuthStateChanged(auth,async u=>{
  }else{window.hexCloud=null;ref=null;SO.style.display='none';L.style.display='flex';F.hidden=false;M.textContent='Sign in to continue'}
 });
 F.addEventListener('submit',e=>{e.preventDefault();M.textContent='Signing in…';
- signInWithEmailAndPassword(auth,document.getElementById('le').value.trim(),document.getElementById('lp').value)
+ signInWithEmailAndPassword(auth,(v=>v.includes('@')?v:v.toLowerCase()+'@hexos.app')(document.getElementById('le').value.trim()),document.getElementById('lp').value)
  .then(()=>{document.getElementById('lp').value=''})
  .catch(x=>{M.textContent=(x.code==='auth/invalid-credential'||x.code==='auth/wrong-password'||x.code==='auth/user-not-found')?'Wrong email or password':'Sign in failed ('+x.code+')'})});
 SO.addEventListener('click',async()=>{await signOut(auth);try{localStorage.removeItem('hexos-v3')}catch(e){}location.reload()});
