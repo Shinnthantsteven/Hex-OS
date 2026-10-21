@@ -35,7 +35,7 @@ nav button[aria-current=true]{color:var(--acc);font-weight:500;box-shadow:inset 
 @media (max-width:460px){.ledger{grid-template-columns:1fr}.ledger>div+div{border-left:0;border-top:1px solid var(--line)}}
 pre.dg{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;overflow-x:auto;font:13px/1.45 ui-monospace,Menlo,monospace;white-space:pre;margin:8px 0}.tw{overflow-x:auto}table.t{border-collapse:collapse;width:100%;font-size:14px}table.t td,table.t th{border:1px solid var(--line);padding:6px;text-align:left}table.t th{background:var(--bg)}details>p,details>pre{margin-left:2px}select{font:inherit;width:100%;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}html{-webkit-text-size-adjust:100%}.card,.nm{overflow-wrap:anywhere}img,svg{max-width:100%}
 button,input[type=checkbox]{touch-action:manipulation}button{min-height:42px}nav button{min-height:56px;font-size:11px}
-@media (max-width:480px){main{padding:10px 10px 100px}h1{font-size:23px}h2{font-size:18px}.big{font-size:27px}.card{padding:13px;border-radius:12px}pre.dg{font-size:12px;padding:8px}table.t{font-size:13px}.row{gap:8px}.fl>label{min-width:100px}}#login{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}.lbox{max-width:340px;width:100%}.lt{font-size:28px;font-weight:700;margin-bottom:6px}#login input{width:100%;font-size:16px;padding:12px;margin:6px 0;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}#login button{width:100%;padding:12px;border-radius:10px;border:0;background:var(--acc);color:#fff;font-size:16px;margin-top:8px}#so{display:none;position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:64px;z-index:5;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:16px}
+@media (max-width:480px){main{padding:10px 10px 100px}h1{font-size:23px}h2{font-size:18px}.big{font-size:27px}.card{padding:13px;border-radius:12px}pre.dg{font-size:12px;padding:8px}table.t{font-size:13px}.row{gap:8px}.fl>label{min-width:100px}}#login{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}.lbox{max-width:340px;width:100%}.lt{font-size:28px;font-weight:700;margin-bottom:6px}#login input{width:100%;font-size:16px;padding:12px;margin:6px 0;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}#login button{width:100%;padding:12px;border-radius:10px;border:0;background:var(--acc);color:#fff;font-size:16px;margin-top:8px}.tbtn{display:flex;gap:8px;align-items:center}#so{display:none;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:16px}
 .hero{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 16%,var(--card)),var(--card));display:flex;gap:18px;align-items:center}
 .ring{--p:0;width:112px;height:112px;border-radius:50%;flex:none;background:conic-gradient(var(--acc) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center}
 .ring b{width:86px;height:86px;border-radius:50%;background:var(--card);display:grid;place-items:center;font:700 24px "Bricolage Grotesque",sans-serif}
@@ -55,7 +55,7 @@ nav button[aria-current=true]{background:color-mix(in srgb,var(--acc) 14%,transp
 main{max-width:1200px;padding:28px 40px}
 #v{columns:2 420px;column-gap:20px}#v.one{columns:1;max-width:860px}
 #v .card{break-inside:avoid;display:block}#v .card.hero{display:flex}.ring{width:132px;height:132px}.ring b{width:102px;height:102px;font-size:28px}}
-</style></head><body><main><div class="top"><div><h1>⬡ Hex OS</h1><p class="small" id="dt"></p></div><button data-th="1" aria-label="Switch light or dark">🌓</button></div><div id="v"></div></main>
+</style></head><body><main><div class="top"><div><h1>⬡ Hex OS</h1><p class="small" id="dt"></p></div><div class="tbtn"><button id="so" aria-label="Sign out" title="Sign out">🔒</button><button data-th="1" aria-label="Switch light or dark">🌓</button></div></div><div id="v"></div></main>
 <nav id="nav"></nav>
 <script>
 (function(){
@@ -78,7 +78,7 @@ ideas:IDEAS,ideaDone:{},theme:'',cfg:{income:0,rent:0,transport:0,food:0,debtPay
 try{var r=(localStorage.getItem(KEY)||localStorage.getItem('growth-ledger-v2'));if(r){var p=JSON.parse(r);for(var k in p)S[k]=p[k]}}catch(e){}
 setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};function migrate(){if(S.mv>=3)return;if(S.mv===2){S.mv=3;S.spend=(S.spend||[]).filter(function(x){return x.a!==8.5});return}S.mv=3;S.spendOld=S.spend||[];S.spend=[];S.pays=[];S.bal=1218.59;S.cfg=S.cfg||{};S.cfg.debtTotal=8000;S.cfg.debtPaid=0;S.balFrom=T}
 var _o=S.mv!==3;migrate();if(_o)try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(window.hexCloud)window.hexCloud(S);queueDrive()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('hexos-mt',String(Date.now()))}catch(e){}if(window.hexCloud)window.hexCloud(S);queueDrive()}
 function $(i){return document.getElementById(i)}
 function esc(s){var d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
 function num(x){return parseFloat(String(x==null?'':x).replace(',','.'))||0}
@@ -105,7 +105,7 @@ function startDate(){var a=(S.start||T).split('-');return new Date(+a[0],+a[1]-1
 function dayIdx(){return Math.round((new Date(now.getFullYear(),now.getMonth(),now.getDate())-startDate())/864e5)}
 function lesson(){var i=doneBefore(),m=Math.min(9,Math.floor(i/30)),t=MON[m][1];return{i:i,m:m,mn:MON[m][0],topic:t[Math.min(t.length-1,Math.floor((i%30)/5))],ex:EX[i%EX.length],tip:TIPS[i%TIPS.length]}}
 function money(){var c=S.cfg,pre=T.slice(0,7),ms=0,ts=0;S.spend.forEach(function(x){if(x.d.slice(0,7)===pre)ms+=x.a;if(x.d===T)ts+=x.a});var fixed=num(c.rent)+num(c.transport)+num(c.food)+num(c.debtPay);
- return{bal:r2(S.bal),ms:r2(ms),ts:r2(ts),fixed:r2(fixed),inc:r2(c.income),left:r2(num(c.income)-fixed),debt:r2(Math.max(0,num(c.debtTotal)-num(c.debtPaid)))}}
+ return{bal:r2(S.bal),ms:r2(ms),ts:r2(ts),fixed:r2(fixed),inc:r2(c.income),left:r2(num(c.income)-fixed),debt:r2(Math.max(0,num(c.debtTotal)-num(c.debtPaid))),owed:r2((S.owed||[]).reduce(function(a,o){return a+(o.paid?0:o.a)},0))}}
 function habitsDone(){var l=S.log[T]||{};return S.habits.filter(function(h){return l[h[0]]}).length}
 function lived(){return Math.floor((now-BORN)/864e5)}
 function total(){return Math.floor((END-BORN)/864e5)}
@@ -422,13 +422,13 @@ function driveSend(p,cb){if(!S.driveUrl||!S.driveTok){cb('Link Drive in the More
  fetch(S.driveUrl,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)}).then(function(r){return r.text()}).then(function(t){var j;try{j=JSON.parse(t)}catch(e){cb('Drive replied with a web page, not data. Redeploy the script as a new version with access set to Anyone');return}cb(j.ok?'':(j.error||'Drive error'),j)}).catch(function(e){cb('Could not reach Drive ('+(e.message||e)+'). In Apps Script: Deploy > Manage deployments > edit > Who has access = Anyone, then Deploy and paste the new /exec link here')})}
 var dT=0;
 function queueDrive(){if(!S.driveUrl||!S.driveTok)return;clearTimeout(dT);dT=setTimeout(function(){syncDay(T)},15000)}
-function syncDay(k,cb,fin){driveSend({kind:'day',date:k,final:!!fin,data:dayData(k)},function(err){if(err)setSt('⚠️ '+err);else{setSt('☁️ Saved to Drive at '+hhmm());if(fin){DS.fin[k]=1;dsSave()}}if(cb)cb(err)})}
+function syncDay(k,cb,fin){if(navigator.onLine===false){setSt('📴 Offline: Drive will update when you are back online');return}driveSend({kind:'day',date:k,final:!!fin,data:dayData(k)},function(err){if(err)setSt('⚠️ '+err);else{setSt('☁️ Saved to Drive at '+hhmm());if(fin){DS.fin[k]=1;dsSave()}}if(cb)cb(err)})}
 function syncWeek(st,cb){var ks=weekDays(st);driveSend({kind:'week',start:ks[0],days:ks.map(dayData)},function(err){if(!err){DS.wk[ks[0]]=1;dsSave()}if(cb)cb(err)})}
 function hasData(k){return !!(S.note[k]||S.learn[k]||S.mood[k]||S.study[k]||S.water[k]||(S.log[k]&&Object.keys(S.log[k]).length)||S.spend.some(function(x){return x.d===k}))}
 function autoDrive(){if(!S.driveUrl||!S.driveTok)return;var ks=[];for(var i=1;i<=7;i++){var d=new Date(now);d.setDate(d.getDate()-i);var k=ds(d);if(!DS.fin[k]&&hasData(k))ks.push(k)}
  (function nx(){var k=ks.shift();if(!k){var lw=weekStart(now);lw.setDate(lw.getDate()-7);var wk=ds(lw);if(!DS.wk[wk]&&weekDays(lw).some(hasData))syncWeek(lw);return}syncDay(k,function(err){if(!err)nx()},true)})()}
 function rollover(){if(ds(new Date())===T)return;if(!S.driveUrl||!S.driveTok){location.reload();return}var ks=[T],lw=weekStart(now);syncDay(T,function(){var nd=weekStart(new Date());if(nd>lw){syncWeek(lw,function(){location.reload()})}else location.reload()},true);setTimeout(function(){location.reload()},20000)}
-setInterval(rollover,30000);
+setInterval(rollover,30000);window.addEventListener('online',function(){autoDrive();queueDrive()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){if(S.driveUrl&&S.driveTok)syncDay(T)}else rollover()});
 function driveCard(){return '<div class="card"><h2>☁️ Google Drive</h2><p class="small">Everything you write is saved in this app straight away. It goes to your Drive about every 15 seconds and a finished daily and weekly report document is made at midnight (folder Hex OS).</p><p id="dst2" style="margin:6px 0"><b>'+esc(DS.st||(S.driveUrl?'Not saved yet today':'Not linked yet'))+'</b></p><input type="text" id="du" placeholder="Web app URL (ends in /exec)" value="'+esc(S.driveUrl||'')+'" autocomplete="off"><input type="password" id="dk" placeholder="'+(S.driveTok?'Secret word saved (type to change)':'Secret word')+'" autocomplete="new-password" style="margin-top:8px"><p class="fl"><button class="p" data-dsave="1">Link Drive</button><button data-ds="1">☁️ Save to cloud now</button></p></div>'}
 function vToday(){var L=lesson(),w=S.water[T]||0,st=S.study[T]||0,l=S.log[T]||{},M=money(),dn=!!S.done[T],pc=Math.round(lived()/total()*100),b=BOOK[L.i];
@@ -450,11 +450,13 @@ function vPlan(){var L=lesson(),i=Math.max(0,dayIdx()),dd=Object.keys(S.done).fi
  return h+'</div><p class="small">Green means you finished that day\'s lesson.</p></div>'+accaCard()+examCard()}
 function vMoney(){var c=S.cfg,M=money(),pre=T.slice(0,7);
  function f(k,l){return '<label class="small">'+l+'<input type="text" inputmode="decimal" data-c="'+k+'" value="'+(num(c[k])||'')+'" placeholder="0.00"></label>'}
- function tile(l,v,cl){return '<div style="flex:1;min-width:130px"><div class="small">'+l+'</div><div class="big '+(cl||'')+'" style="font-size:24px">'+aed(v)+'</div></div>'}
- var h='<div class="card"><h2>💰 This month</h2><div class="fl" style="gap:16px">'+tile('Balance',M.bal,M.bal<0?'red':'good')+tile('Spent this month',M.ms)+tile('Debt left',M.debt,M.debt>0?'red':'good')+'</div><p class="small" style="margin:10px 0 0">Spent today: '+aed(M.ts)+'</p><div class="fl" style="margin-top:8px"><label class="small">Set balance<input type="text" inputmode="decimal" id="nb" placeholder="'+M.bal.toFixed(2)+'"></label><button data-setbal="1">Update</button></div></div>';
+ function tile(l,v,cl){return '<div style="flex:1 1 40%;min-width:140px"><div class="small">'+l+'</div><div class="big '+(cl||'')+'" style="font-size:24px;white-space:nowrap">'+aed(v)+'</div></div>'}
+ var h='<div class="card"><h2>💰 This month</h2><div class="fl" style="gap:16px">'+tile('Balance',M.bal,M.bal<0?'red':'good')+tile('Spent this month',M.ms)+tile('Debt left',M.debt,M.debt>0?'red':'good')+tile('Owed to me',M.owed,M.owed>0?'good':'')+'</div><p class="small" style="margin:10px 0 0">Spent today: '+aed(M.ts)+'</p><div class="fl" style="margin-top:8px"><label class="small">Set balance<input type="text" inputmode="decimal" id="nb" placeholder="'+M.bal.toFixed(2)+'"></label><button data-setbal="1">Update</button></div></div>';
  h+='<div class="card"><h2>📋 Monthly items</h2><div class="row"><span class="nm">Income</span><b>'+aed(M.inc)+'</b></div><div class="row"><span class="nm">Rent</span>'+aed(c.rent)+'</div><div class="row"><span class="nm">Transport</span>'+aed(c.transport)+'</div><div class="row"><span class="nm">Food</span>'+aed(c.food)+'</div><div class="row"><span class="nm">Debt payment</span>'+aed(c.debtPay)+'</div><div class="row"><span class="nm"><b>Left after regular costs</b></span><b class="'+(M.left<0?'red':'good')+'">'+aed(M.left)+'</b></div><details><summary>✏️ Edit monthly items</summary><div class="fl" style="margin-top:8px">'+f('income','Income')+f('rent','Rent')+f('transport','Transport')+f('food','Food')+f('debtPay','Debt payment')+f('debtTotal','Total debt')+'</div></details></div>';
  h+='<div class="card"><h2>🧾 Add spending</h2><div class="fl"><label class="small">Amount<input type="text" id="sa" inputmode="decimal" placeholder="0.00"></label><label class="small" style="flex:2">What for<input type="text" id="sn" placeholder="Breakfast, dinner..."></label></div><p><button class="p" data-addsp="1">Add</button></p>'+S.spend.filter(function(x){return x.d.slice(0,7)===pre}).slice().reverse().map(function(x){return '<div class="row"><span class="nm">'+(x.d===T?'':'<span class="small">'+x.d.slice(5)+'</span> ')+esc(x.n)+'</span>'+aed(x.a)+'<button data-delsp="'+x.id+'">Remove</button></div>'}).join('')+'</div>';
  h+='<div class="card"><h2>🎯 Debt</h2><p>Owed <b>'+aed(M.debt)+'</b> of '+aed(c.debtTotal)+'. Paid so far '+aed(c.debtPaid)+'.</p><div class="bar"><i style="width:'+(num(c.debtTotal)?Math.min(100,num(c.debtPaid)/num(c.debtTotal)*100):0)+'%"></i></div><div class="fl"><label class="small">Payment made<input type="text" id="dp" inputmode="decimal" placeholder="0.00"></label><button class="p" data-pay="1">Log payment</button></div><p class="small">A payment lowers your debt and your balance.</p>'+(S.pays||[]).slice(-5).reverse().map(function(x){return '<div class="row"><span class="nm">'+x.d+'</span>'+aed(x.a)+'<button data-delpay="'+x.id+'">Remove</button></div>'}).join('')+'</div>';
+ S.owed=S.owed||[];
+ h+='<div class="card"><h2>🤝 Owed to me</h2><p>People owe you <b>'+aed(M.owed)+'</b>. Adding one takes it off your balance. Tick the circle when they pay you back and it returns to your balance. Untick to undo.</p><div class="fl"><label class="small">Who<input type="text" id="on" placeholder="Name"></label><label class="small">Amount<input type="text" id="oa" inputmode="decimal" placeholder="0.00"></label></div><p><button class="p" data-addow="1">Lend</button></p>'+S.owed.map(function(x){return '<div class="row"><input type="checkbox" data-owpd="'+x.id+'" '+(x.paid?'checked':'')+' aria-label="paid back"><span class="nm" style="'+(x.paid?'text-decoration:line-through;opacity:.6':'')+'"><b>'+esc(x.n)+'</b> <span class="small">since '+x.d.slice(5)+(x.paid?' · paid back':'')+'</span></span><b>'+aed(x.paid?(x.pa||0):x.a)+'</b><button data-delow="'+x.id+'">Remove</button></div>'}).join('')+'</div>';
  return h}
 
 var PROMPTS=['What made me smile today?','I am grateful for','Something hard today was','I am proud that','Tomorrow I will'];
@@ -465,7 +467,7 @@ function vJournal(){var h='<div class="card hero"><div><div class="small">'+now.
   h+='<div class="card"><h2>🗓️ Past days</h2>';var any=0;for(var j=1;j<=14;j++){var d=new Date(now);d.setDate(d.getDate()-j);var k=ds(d);if(S.note[k]||S.learn[k]||S.mood[k]){any=1;h+='<div class="row" style="align-items:flex-start"><div style="min-width:64px"><b>'+d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+'</b><br><span class="small">'+d.toLocaleDateString(undefined,{weekday:'short'})+'</span></div><span class="nm"><span class="small">'+esc(S.mood[k]||'')+'</span><br>'+esc(((S.note[k]||'')+' '+(S.learn[k]||'')).trim().slice(0,160))+'</span></div>'}}
  return h+(any?'':'<p class="small">Nothing saved yet. Write today\'s entry above.</p>')+'</div>'}
 function report(){var M=money(),L=lesson();return 'Daily report '+T+'\nHabits: '+habitsDone()+'/'+S.habits.length+'\nStudy: '+(S.study[T]||0)+' min\nWater: '+(S.water[T]||0)+' ml\nLesson: '+L.topic+' ('+(S.done[T]?'done':'not done')+')\nSpent today: '+aed(M.ts)+'. Balance: '+aed(M.bal)+'. Debt left: '+aed(M.debt)+'\nMood: '+(S.mood[T]||'-')+'\nLearned: '+(S.learn[T]||'-')+'\nFiles: '+((S.files[T]||[]).map(function(f){return f.n}).join(', ')||'-')+'\nThoughts: '+(S.note[T]||'-')}
-function vMe(){var ws=weekStart(now);return driveCard()+'<div class="card"><h2>📊 Today\'s report</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">'+esc(report())+'</pre><p><button class="p" data-copy="r">Copy today</button> <button data-copy="y">Copy yesterday</button></p></div><div class="card"><h2>🗓️ This week</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">'+esc(weekReport(ws))+'</pre><p><button class="p" data-copy="w">Copy week</button></p></div><div class="card"><h2>💾 Backup</h2><p class="small">Copy a full backup now and then. To restore on another device, paste it below.</p><button data-copy="b">Copy backup</button><textarea rows="3" id="rs" placeholder="Paste backup here" style="margin-top:8px"></textarea><p><button data-restore="1">Restore</button></p></div>'}
+function vMe(){var ws=weekStart(now);return driveCard()+'<div class="card"><h2>📊 Today\'s report</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">'+esc(report())+'</pre><p><button class="p" data-copy="r">Copy today</button> <button data-copy="y">Copy yesterday</button></p></div><div class="card"><h2>🗓️ This week</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">'+esc(weekReport(ws))+'</pre><p><button class="p" data-copy="w">Copy week</button></p></div>'}
 function detailCard(L){var i=L.i,t=Math.min(5,Math.floor((i%30)/5)),k=i%5,h='';
  if(L.m===0){var d=DET[t];h='<div class="card"><h2>📝 Step by step: '+esc(d[0])+' (day '+(k+1)+' of 5)</h2><p>'+esc(d[1][k])+'</p><p class="small">Plan about 2 hours: 30 min reading, 60 min practice, 30 min notes in the Journal tab.</p></div>'}
  else h='<div class="card"><h2>📝 Step by step</h2><p class="small">Detailed tap-by-tap lessons for month '+(L.m+1)+' are added month by month. For today, work on "'+esc(L.topic)+'" in your QuickBooks practice file and Excel, then write what you learned in the Journal tab.</p></div>';
@@ -512,6 +514,9 @@ document.addEventListener('click',function(e){var t=(e.target.closest&&e.target.
  if(d.delsp){var rm=S.spend.filter(function(s){return String(s.id)===d.delsp})[0];if(rm){S.bal=r2(num(S.bal)+rm.a);S.spend=S.spend.filter(function(s){return s!==rm});save();draw()}}
  if(d.delpay){S.pays=S.pays||[];var rp=S.pays.filter(function(s){return String(s.id)===d.delpay})[0];if(rp){S.bal=r2(num(S.bal)+rp.a);S.cfg.debtPaid=r2(num(S.cfg.debtPaid)-rp.a);S.pays=S.pays.filter(function(s){return s!==rp});save();draw()}}
  if(d.pay){var p=r2(num($('dp').value));if(p>0){S.cfg.debtPaid=r2(num(S.cfg.debtPaid)+p);S.bal=r2(num(S.bal)-p);S.pays=(S.pays||[]).concat([{id:Date.now(),d:T,a:p}]);save();draw()}}
+ if(d.addow){var oa=r2(num($('oa').value)),on=$('on').value.trim()||'Someone';if(oa>0){S.owed=S.owed||[];S.owed.push({id:Date.now(),n:on,t:oa,a:oa,d:T,paid:false});S.bal=r2(num(S.bal)-oa);save();draw()}}
+ if(d.owpd){var ox=(S.owed||[]).filter(function(o){return String(o.id)===d.owpd})[0];if(ox){if(!ox.paid){ox.paid=true;ox.pa=ox.a;S.bal=r2(num(S.bal)+ox.pa)}else{ox.paid=false;S.bal=r2(num(S.bal)-(ox.pa||0));ox.pa=0}save();draw()}}
+ if(d.delow){var od=(S.owed||[]).filter(function(o){return String(o.id)===d.delow})[0];if(od&&confirm(od.paid?'Remove this entry? Your balance will not change.':'Remove this entry? The amount will go back to your balance.')){if(!od.paid)S.bal=r2(num(S.bal)+od.a);S.owed=S.owed.filter(function(o){return o!==od});save();draw()}}
  if(d.copy){copy(d.copy==='r'?report():d.copy==='y'?reportFor(yest()):d.copy==='w'?weekReport(weekStart(now)):JSON.stringify(S));t.textContent='Copied'}
  if(d.restore){try{var o=JSON.parse($('rs').value);if(o&&o.habits){S=o;save();draw()}}catch(x){t.textContent='Not valid, check the paste'}}});
 document.addEventListener('change',function(e){var t=e.target,d=t.dataset;
@@ -528,7 +533,6 @@ setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=fu
 </script>
 <div id="login"><div class="lbox"><div class="lt">⬡ Hex OS</div><p id="lmsg" class="small">Checking login…</p>
 <form id="lf" hidden><input type="text" id="le" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Username or email" required><input type="password" id="lp" autocomplete="current-password" placeholder="Password" required><button type="submit">🔓 Sign in</button></form></div></div>
-<button id="so" aria-label="Sign out" title="Sign out">🔒</button>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -536,13 +540,23 @@ import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs
 const cfg={apiKey:"AIzaSyD1tbCPpC8ofdSqcxd40MnfrgZvUu6pgP4",authDomain:"hex-os-6cebf.firebaseapp.com",projectId:"hex-os-6cebf",storageBucket:"hex-os-6cebf.firebasestorage.app",messagingSenderId:"865562586212",appId:"1:865562586212:web:f987f00369c5b979258371"};
 const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 const L=document.getElementById('login'),F=document.getElementById('lf'),M=document.getElementById('lmsg'),SO=document.getElementById('so');
-let ref=null,timer=null,lastT=0;
-async function push(S){lastT=Date.now();await setDoc(ref,{json:JSON.stringify(S),t:lastT})}
-async function pull(first){const s=await getDoc(ref);if(s.exists()){const d=s.data();if(d.t>lastT){lastT=d.t;window.hexApply(JSON.parse(d.json))}}else if(first){await push(window.hexGet())}}
+let ref=null,timer=null,lastT=0,synced=false;
+async function push(S){lastT=Date.now();await setDoc(ref,{json:JSON.stringify(S),t:lastT});try{localStorage.setItem('hexos-mt',String(Math.max(+localStorage.getItem('hexos-mt')||0,lastT)))}catch(e){}}
+async function pull(first){const s=await getDoc(ref);synced=true;const lm=+localStorage.getItem('hexos-mt')||0;
+ if(s.exists()){const d=s.data();
+  if(d.t>lm&&d.t>lastT){lastT=d.t;window.hexApply(JSON.parse(d.json));try{localStorage.setItem('hexos-mt',String(d.t))}catch(e){}}
+  else if(lm>d.t){await push(window.hexGet())}
+ }else if(first||lm>0){await push(window.hexGet())}}
 onAuthStateChanged(auth,async u=>{
  if(u){ref=doc(db,'users',u.uid,'app','state');
-  try{await pull(true);window.hexCloud=S=>{clearTimeout(timer);timer=setTimeout(()=>push(S).catch(()=>{}),1500)};L.style.display='none';SO.style.display='block'}
-  catch(e){M.textContent='Could not load your data ('+(e.code||'error')+'). Check your internet and refresh.'}
+  const hasLocal=!!localStorage.getItem('hexos-v3');
+  const unlock=()=>{window.hexCloud=S=>{clearTimeout(timer);timer=setTimeout(()=>(synced?push(S):pull(false)).catch(()=>{}),1500)};L.style.display='none';SO.style.display='block'};
+  try{
+   if(navigator.onLine===false&&hasLocal){unlock();return}
+   await Promise.race([pull(true),new Promise((_,j)=>setTimeout(()=>j({code:'timeout'}),6000))]);unlock()
+  }catch(e){
+   if(hasLocal)unlock();else M.textContent='Could not load your data ('+(e.code||'error')+'). Check your internet and refresh.'
+  }
  }else{window.hexCloud=null;ref=null;SO.style.display='none';L.style.display='flex';F.hidden=false;M.textContent='Sign in to continue'}
 });
 F.addEventListener('submit',e=>{e.preventDefault();M.textContent='Signing in…';
@@ -551,5 +565,7 @@ F.addEventListener('submit',e=>{e.preventDefault();M.textContent='Signing in…'
  .catch(x=>{M.textContent=(x.code==='auth/invalid-credential'||x.code==='auth/wrong-password'||x.code==='auth/user-not-found')?'Wrong email or password':'Sign in failed ('+x.code+')'})});
 SO.addEventListener('click',async()=>{await signOut(auth);try{localStorage.removeItem('hexos-v3')}catch(e){}location.reload()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ref&&window.hexCloud)pull(false).catch(()=>{})});
+window.addEventListener('online',()=>{if(ref&&window.hexCloud)pull(false).catch(()=>{})});
 </script>
+<script>if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})</script>
 </body></html>
