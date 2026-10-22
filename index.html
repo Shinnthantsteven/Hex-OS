@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Hex OS</title><meta name="theme-color" content="#2f5bea"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hex OS"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,4 91,27 91,73 50,96 9,73 9,27' fill='%232f5bea'/%3E%3Cpolygon points='50,24 74,38 74,62 50,76 26,62 26,38' fill='white'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -55,6 +55,13 @@ nav button[aria-current=true]{background:color-mix(in srgb,var(--acc) 14%,transp
 main{max-width:1200px;padding:28px 40px}
 #v{columns:2 420px;column-gap:20px}#v.one{columns:1;max-width:860px}
 #v .card{break-inside:avoid;display:block}#v .card.hero{display:flex}.ring{width:132px;height:132px}.ring b{width:102px;height:102px;font-size:28px}}
+/* phone: fixed one-page app, no page drag, no zoom */
+@media (max-width:899px){
+html,body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+main{position:fixed;inset:0;max-width:none;margin:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-left:max(10px,calc((100vw - 680px)/2));padding-right:max(10px,calc((100vw - 680px)/2));padding-bottom:110px}
+input,select,textarea{font-size:16px}
+img,pre,table{max-width:100%}
+}
 </style></head><body><main><div class="top"><div><h1>⬡ Hex OS</h1><p class="small" id="dt"></p><p class="small" id="dst"></p></div><div class="tbtn"><button id="so" aria-label="Sign out" title="Sign out">🔒</button><button data-th="1" aria-label="Switch light or dark">🌓</button></div></div><div id="v"></div></main>
 <nav id="nav"></nav>
 <script>
@@ -509,7 +516,7 @@ function copy(t){try{navigator.clipboard.writeText(t)}catch(e){var a=document.cr
 document.addEventListener('click',function(e){var t=(e.target.closest&&e.target.closest('button'))||e.target,d=t.dataset;if(!d)return;
  if(d.th){S.theme=(document.documentElement.getAttribute('data-theme')==='dark'||(!S.theme&&matchMedia('(prefers-color-scheme: dark)').matches))?'light':'dark';save();draw();return}
  if(d.addidea){var v=$('ni').value.trim();if(v){S.ideas.push(v);save();draw()}return}
- if(d.tab){S.tab=d.tab;save();draw();window.scrollTo(0,0);return}
+ if(d.tab){S.tab=d.tab;save();draw();window.scrollTo(0,0);var mm=document.querySelector("main");if(mm)mm.scrollTop=0;return}
  if(d.gla){var ga=$('ga').value,dr=num($('gdr').value),cr=num($('gcr').value);if(ga&&(dr>0)!==(cr>0)){S.gd.push({id:Date.now(),a:ga,dr:dr,cr:cr,n:$('gn').value});save();draw()}return}
  if(d.glx){S.gd=S.gd.filter(function(x){return String(x.id)!==d.glx});save();draw();return}
  if(d.glp){var q=glTot(S.gd);if(q[0]===q[1]&&q[0]>0){var e=(S.gp.length?S.gp[S.gp.length-1].e:0)+1;S.gd.forEach(function(x){S.gp.push({e:e,d:T,a:x.a,dr:x.dr,cr:x.cr,n:x.n})});S.gd=[];save();draw()}return}
@@ -589,5 +596,5 @@ SO.addEventListener('click',async()=>{await signOut(auth);try{localStorage.remov
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ref&&window.hexCloud)pull(false).catch(()=>{})});
 window.addEventListener('online',()=>{if(ref&&window.hexCloud)pull(false).catch(()=>{})});
 </script>
-<script>try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})</script>
+<script>['gesturestart','gesturechange','gestureend'].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault()},{passive:false})});document.addEventListener('touchmove',function(e){if(e.touches.length>1)e.preventDefault()},{passive:false});try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})</script>
 </body></html>
