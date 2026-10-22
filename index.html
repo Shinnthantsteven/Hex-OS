@@ -92,7 +92,11 @@ log:{},water:{},goal:1500,study:{},start:'2026-10-05',done:{},mood:{},note:{},le
 ideas:IDEAS,ideaDone:{},theme:'',cfg:{income:0,rent:0,transport:0,food:0,debtPay:0,debtTotal:0,debtPaid:0}};
 try{var r=(localStorage.getItem(KEY)||localStorage.getItem('growth-ledger-v2'));if(r){var p=JSON.parse(r);for(var k in p)S[k]=p[k]}}catch(e){}
 setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};function migrate(){if(S.mv>=3)return;if(S.mv===2){S.mv=3;S.spend=(S.spend||[]).filter(function(x){return x.a!==8.5});return}S.mv=3;S.spendOld=S.spend||[];S.spend=[];S.pays=[];S.bal=1218.59;S.cfg=S.cfg||{};S.cfg.debtTotal=8000;S.cfg.debtPaid=0;S.balFrom=T}
-var _o=S.mv!==3;migrate();if(_o)try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+var OPEN_BAL=r2(923.34+198.4);
+function migrate4(){if(S.mv>=4)return;S.del=S.del||{};['spend','pays','owed'].forEach(function(f){(S[f]||[]).forEach(function(x){S.del[x.id]=1})});S.spendOld=(S.spendOld||[]).concat(S.spend||[]);S.spend=[];S.pays=[];S.owed=[];S.cfg=S.cfg||{};S.mv=4;delete S.bal}
+function calcBal(){var b=OPEN_BAL;(S.spend||[]).forEach(function(x){b-=num(x.a)});(S.pays||[]).forEach(function(x){b-=num(x.a)});(S.owed||[]).forEach(function(o){b-=num(o.a)-(o.paid?num(o.pa):0)});return r2(b)}
+window.hexTest={calcBal:calcBal,reportFor:function(k){return reportFor(k)},tab:function(t){S.tab=t;draw()}};
+var _o=S.mv!==4;migrate();migrate4();if(_o)try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('hexos-mt',String(Date.now()))}catch(e){}if(window.hexCloud)window.hexCloud(S);queueDrive()}
 function $(i){return document.getElementById(i)}
 function esc(s){var d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
@@ -120,7 +124,7 @@ function startDate(){var a=(S.start||T).split('-');return new Date(+a[0],+a[1]-1
 function dayIdx(){return Math.round((new Date(now.getFullYear(),now.getMonth(),now.getDate())-startDate())/864e5)}
 function lesson(){var i=doneBefore(),m=Math.min(9,Math.floor(i/30)),t=MON[m][1];return{i:i,m:m,mn:MON[m][0],topic:t[Math.min(t.length-1,Math.floor((i%30)/5))],ex:EX[i%EX.length],tip:TIPS[i%TIPS.length]}}
 function money(){var c=S.cfg,pre=T.slice(0,7),ms=0,ts=0;S.spend.forEach(function(x){if(x.d.slice(0,7)===pre)ms+=x.a;if(x.d===T)ts+=x.a});var fixed=num(c.rent)+num(c.transport)+num(c.food)+num(c.debtPay);
- return{bal:r2(S.bal),ms:r2(ms),ts:r2(ts),fixed:r2(fixed),inc:r2(c.income),left:r2(num(c.income)-fixed),debt:r2(Math.max(0,num(c.debtTotal)-num(c.debtPaid))),owed:r2((S.owed||[]).reduce(function(a,o){return a+(o.paid?0:o.a)},0))}}
+ return{bal:calcBal(),ms:r2(ms),ts:r2(ts),fixed:r2(fixed),inc:r2(c.income),left:r2(num(c.income)-fixed),debt:r2(Math.max(0,num(c.debtTotal)-num(c.debtPaid))),owed:r2((S.owed||[]).reduce(function(a,o){return a+(o.paid?0:o.a)},0))}}
 function habitsDone(){var l=S.log[T]||{};return S.habits.filter(function(h){return l[h[0]]}).length}
 function lived(){return Math.floor((now-BORN)/864e5)}
 function total(){return Math.floor((END-BORN)/864e5)}
@@ -470,7 +474,10 @@ var DATEKEYS=['log','water','study','done','mood','note','learn','files','ps'];
 function mergeState(a,b){var o={},k;a=a||{};b=b||{};for(k in b)o[k]=b[k];for(k in a)o[k]=a[k];
  DATEKEYS.forEach(function(f){var x=b[f]||{},y=a[f]||{},m={},d,h;for(d in x)m[d]=x[d];
   for(d in y){if(f==='log'&&x[d]&&typeof x[d]==='object'&&y[d]&&typeof y[d]==='object'){var mm={};for(h in x[d])mm[h]=x[d][h];for(h in y[d])mm[h]=y[d][h];m[d]=mm}else m[d]=y[d]}
-  o[f]=m});return o}
+  o[f]=m});
+ var del={},q;for(q in (b.del||{}))del[q]=1;for(q in (a.del||{}))del[q]=1;o.del=del;
+ ['spend','pays','owed'].forEach(function(f){var m={},r=[];(b[f]||[]).forEach(function(x){m[x.id]=x});(a[f]||[]).forEach(function(x){m[x.id]=x});Object.keys(m).forEach(function(id){if(!del[id])r.push(m[id])});r.sort(function(x,y){return x.id-y.id});o[f]=r});
+ return o}
 function hexBlank(s){if(!s)return true;var f=['log','water','study','done','mood','note','learn'],i,k,v;
  for(i=0;i<f.length;i++){var o=s[f[i]]||{};for(k in o){v=o[k];if(v&&(typeof v!=='object'||Object.keys(v).some(function(h){return v[h]})))return false}}
  return !(s.spend||[]).length}
@@ -478,7 +485,7 @@ function stableStr(v){if(v===null||typeof v!=='object')return JSON.stringify(v);
 function hexSame(a,b){function c(x){var o={},k;for(k in x)if(k!=='tab')o[k]=x[k];return o}return stableStr(c(a))===stableStr(c(b))}
 window.hexMerge=mergeState;window.hexBlank=hexBlank;window.hexSame=hexSame;
 function backupState(force){if(!S.driveUrl||!S.driveTok||hexBlank(S))return;
- if(!force){if(DS.bkOld&&Date.now()-DS.bkOld<3600000)return;if(Date.now()-(DS.bk||0)<600000)return}
+ if(!force){if(DS.bkOld&&Date.now()-DS.bkOld<3600000)return;if(Date.now()-(DS.bk||0)<120000)return}
  var c={},k;for(k in S)if(k!=='driveUrl'&&k!=='driveTok'&&k!=='tab')c[k]=S[k];
  driveSend({kind:'state',data:c},function(err){if(err==='Unknown request'){DS.bkOld=Date.now();dsSave();return}if(!err){DS.bk=Date.now();DS.bkOld=0;dsSave()}})}
 function mergeDay(d){if(!d||!d.date)return 0;var k=d.date,n=0,l=S.log[k]||{};
@@ -539,7 +546,7 @@ function vPlan(){var L=lesson(),i=Math.max(0,dayIdx()),dd=Object.keys(S.done).fi
 function vMoney(){var c=S.cfg,M=money(),pre=T.slice(0,7);
  function f(k,l){return '<label class="small">'+l+'<input type="text" inputmode="decimal" data-c="'+k+'" value="'+(num(c[k])||'')+'" placeholder="0.00"></label>'}
  function tile(l,v,cl){return '<div style="flex:1 1 40%;min-width:140px"><div class="small">'+l+'</div><div class="big '+(cl||'')+'" style="font-size:24px;white-space:nowrap">'+aed(v)+'</div></div>'}
- var h='<div class="card"><h2>💰 This month</h2><div class="fl" style="gap:16px">'+tile('Balance',M.bal,M.bal<0?'red':'good')+tile('Spent this month',M.ms)+tile('Debt left',M.debt,M.debt>0?'red':'good')+tile('Owed to me',M.owed,M.owed>0?'good':'')+'</div><p class="small" style="margin:10px 0 0">Spent today: '+aed(M.ts)+'</p><div class="fl" style="margin-top:8px"><label class="small">Set balance<input type="text" inputmode="decimal" id="nb" placeholder="'+M.bal.toFixed(2)+'"></label><button data-setbal="1">Update</button></div></div>';
+ var h='<div class="card"><h2>💰 This month</h2><div class="fl" style="gap:16px">'+tile('Balance',M.bal,M.bal<0?'red':'good')+tile('Spent this month',M.ms)+tile('Debt left',M.debt,M.debt>0?'red':'good')+tile('Owed to me',M.owed,M.owed>0?'good':'')+'</div><p class="small" style="margin:10px 0 0">Spent today: '+aed(M.ts)+'</p><p class="small" style="margin:8px 0 0">🔒 Opening balance AED '+OPEN_BAL.toFixed(2)+' (923.34 + 198.40) is locked. Only your spending, debt payments and loans change your balance.</p></div>';
  h+='<div class="card"><h2>📋 Monthly items</h2><div class="row"><span class="nm">Income</span><b>'+aed(M.inc)+'</b></div><div class="row"><span class="nm">Rent</span>'+aed(c.rent)+'</div><div class="row"><span class="nm">Transport</span>'+aed(c.transport)+'</div><div class="row"><span class="nm">Food</span>'+aed(c.food)+'</div><div class="row"><span class="nm">Debt payment</span>'+aed(c.debtPay)+'</div><div class="row"><span class="nm"><b>Left after regular costs</b></span><b class="'+(M.left<0?'red':'good')+'">'+aed(M.left)+'</b></div><details><summary>✏️ Edit monthly items</summary><div class="fl" style="margin-top:8px">'+f('income','Income')+f('rent','Rent')+f('transport','Transport')+f('food','Food')+f('debtPay','Debt payment')+f('debtTotal','Total debt')+'</div></details></div>';
  h+='<div class="card"><h2>🧾 Add spending</h2><div class="fl"><label class="small">Amount<input type="text" id="sa" inputmode="decimal" placeholder="0.00"></label><label class="small" style="flex:2">What for<input type="text" id="sn" placeholder="Breakfast, dinner..."></label></div><p><button class="p" data-addsp="1">Add</button></p>'+S.spend.filter(function(x){return x.d.slice(0,7)===pre}).slice().reverse().map(function(x){return '<div class="row"><span class="nm">'+(x.d===T?'':'<span class="small">'+x.d.slice(5)+'</span> ')+esc(x.n)+'</span>'+aed(x.a)+'<button data-delsp="'+x.id+'">Remove</button></div>'}).join('')+'</div>';
  h+='<div class="card"><h2>🎯 Debt</h2><p>Owed <b>'+aed(M.debt)+'</b> of '+aed(c.debtTotal)+'. Paid so far '+aed(c.debtPaid)+'.</p><div class="bar"><i style="width:'+(num(c.debtTotal)?Math.min(100,num(c.debtPaid)/num(c.debtTotal)*100):0)+'%"></i></div><div class="fl"><label class="small">Payment made<input type="text" id="dp" inputmode="decimal" placeholder="0.00"></label><button class="p" data-pay="1">Log payment</button></div><p class="small">A payment lowers your debt and your balance.</p>'+(S.pays||[]).slice(-5).reverse().map(function(x){return '<div class="row"><span class="nm">'+x.d+'</span>'+aed(x.a)+'<button data-delpay="'+x.id+'">Remove</button></div>'}).join('')+'</div>';
@@ -562,7 +569,7 @@ function detailCard(L){var i=L.i,t=Math.min(5,Math.floor((i%30)/5)),k=i%5,h='';
  return h+'<div class="card"><h2>⌨️ Cursor, 10 minutes</h2><p class="small">Open Cursor and build one tiny piece of an idea from the Ideas tab (a form, a button, a table). Stop at 10 minutes and tick the habit.</p></div>'}
 function examCard(){return '<div class="card"><h2>🎓 Exam centre (months 9 and 10)</h2>'+EXAM.map(function(x,i){return i?'<p class="small">'+esc(x)+'</p>':'<p>'+esc(x)+'</p>'}).join('')+'</div>'}
 function vIdeas(){return projGuides()+'<div class="card"><h2>💡 Ideas to try</h2>'+S.ideas.map(function(x,i){return '<div class="row"><input type="checkbox" data-idea="'+i+'" '+(S.ideaDone[i]?'checked':'')+' aria-label="'+esc(x)+'"><span class="nm">'+esc(x)+'</span></div>'}).join('')+'<div class="fl" style="margin-top:10px"><input type="text" id="ni" placeholder="Add your own idea" style="flex:1"><button class="p" data-addidea="1">Add</button></div></div><div class="card"><h2>🍀 Healthy dopamine</h2>'+HEAL.map(function(x){return '<div class="row"><span class="nm">'+esc(x)+'</span></div>'}).join('')+'</div>'}
-function reportFor(k){var sp=0;S.spend.forEach(function(x){if(x.d===k)sp+=x.a});var l=S.log[k]||{},n=S.habits.filter(function(h){return l[h[0]]}).length;return 'Daily report '+k+'\nMood: '+(S.mood[k]||'-')+'\nHabits: '+n+'/'+S.habits.length+' ('+(S.habits.filter(function(h){return l[h[0]]}).map(function(h){return h[1]}).join(', ')||'none')+')\nStudy: '+(S.study[k]||0)+' min\nWater: '+(S.water[k]||0)+' ml\nLesson: '+(S.done[k]?'done':'not done')+'\nSpent: '+aed(sp)+(k===T?'\nBalance: '+aed(S.bal)+'\nDebt left: '+aed(money().debt):'')+'\n\nJournal:\n'+(S.note[k]||'-')+'\n\nLearned:\n'+(S.learn[k]||'-')}
+function reportFor(k){var sp=0;S.spend.forEach(function(x){if(x.d===k)sp+=x.a});var l=S.log[k]||{},n=S.habits.filter(function(h){return l[h[0]]}).length;return 'Daily report '+k+'\nMood: '+(S.mood[k]||'-')+'\nHabits: '+n+'/'+S.habits.length+' ('+(S.habits.filter(function(h){return l[h[0]]}).map(function(h){return h[1]}).join(', ')||'none')+')\nStudy: '+(S.study[k]||0)+' min\nWater: '+(S.water[k]||0)+' ml\nLesson: '+(S.done[k]?'done':'not done')+'\nSpent: '+aed(sp)+(k===T?'\nBalance: '+aed(calcBal())+'\nDebt left: '+aed(money().debt):'')+'\n\nJournal:\n'+(S.note[k]||'-')+'\n\nLearned:\n'+(S.learn[k]||'-')}
 function dayData(k){var l=S.log[k]||{},sp=[],t=0;S.spend.forEach(function(x){if(x.d===k){sp.push({n:x.n,a:x.a});t+=x.a}});var M=money();
  return{date:k,mood:S.mood[k]||'',habits:S.habits.map(function(h){return[h[1],!!l[h[0]]]}),study:S.study[k]||0,water:S.water[k]||0,lessonDone:!!S.done[k],spent:r2(t),items:sp,note:S.note[k]||'',learn:S.learn[k]||'',balance:k===T?M.bal:null,debt:k===T?M.debt:null}}
 function weekStart(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
@@ -599,15 +606,14 @@ document.addEventListener('click',function(e){var t=(e.target.closest&&e.target.
  if(d.w){S.water[T]=Math.max(0,(S.water[T]||0)+ +d.w);save();draw()}
  if(d.s){S.study[T]=Math.max(0,(S.study[T]||0)+ +d.s);save();draw()}
  if(d.mood){S.mood[T]=d.mood;save();draw()}
- if(d.addsp){var a=r2(num($('sa').value));if(a>0){S.spend.push({id:Date.now(),d:T,a:a,n:$('sn').value||'Spending'});S.bal=r2(num(S.bal)-a);save();draw()}}
- if(d.setbal){var nb=$('nb').value.trim();if(nb!==''){S.bal=r2(num(nb));save();draw()}}
- if(d.delsp){var rm=S.spend.filter(function(s){return String(s.id)===d.delsp})[0];if(rm){S.bal=r2(num(S.bal)+rm.a);S.spend=S.spend.filter(function(s){return s!==rm});save();draw()}}
- if(d.delpay){S.pays=S.pays||[];var rp=S.pays.filter(function(s){return String(s.id)===d.delpay})[0];if(rp){S.bal=r2(num(S.bal)+rp.a);S.cfg.debtPaid=r2(num(S.cfg.debtPaid)-rp.a);S.pays=S.pays.filter(function(s){return s!==rp});save();draw()}}
- if(d.pay){var p=r2(num($('dp').value));if(p>0){S.cfg.debtPaid=r2(num(S.cfg.debtPaid)+p);S.bal=r2(num(S.bal)-p);S.pays=(S.pays||[]).concat([{id:Date.now(),d:T,a:p}]);save();draw()}}
+ if(d.addsp){var a=r2(num($('sa').value));if(a>0){S.spend.push({id:Date.now(),d:T,a:a,n:$('sn').value||'Spending'});save();draw()}}
+ if(d.delsp){var rm=S.spend.filter(function(s){return String(s.id)===d.delsp})[0];if(rm){S.del=S.del||{};S.del[rm.id]=1;S.spend=S.spend.filter(function(s){return s!==rm});save();draw()}}
+ if(d.delpay){S.pays=S.pays||[];var rp=S.pays.filter(function(s){return String(s.id)===d.delpay})[0];if(rp){S.del=S.del||{};S.del[rp.id]=1;S.cfg.debtPaid=r2(num(S.cfg.debtPaid)-rp.a);S.pays=S.pays.filter(function(s){return s!==rp});save();draw()}}
+ if(d.pay){var p=r2(num($('dp').value));if(p>0){S.cfg.debtPaid=r2(num(S.cfg.debtPaid)+p);S.pays=(S.pays||[]).concat([{id:Date.now(),d:T,a:p}]);save();draw()}}
  if(d.retrypdf){upPdf(+d.retrypdf)}
- if(d.addow){var oa=r2(num($('oa').value)),on=$('on').value.trim()||'Someone';if(oa>0){S.owed=S.owed||[];S.owed.push({id:Date.now(),n:on,t:oa,a:oa,d:T,paid:false});S.bal=r2(num(S.bal)-oa);save();draw()}}
- if(d.owpd){var ox=(S.owed||[]).filter(function(o){return String(o.id)===d.owpd})[0];if(ox){if(!ox.paid){ox.paid=true;ox.pa=ox.a;S.bal=r2(num(S.bal)+ox.pa)}else{ox.paid=false;S.bal=r2(num(S.bal)-(ox.pa||0));ox.pa=0}save();draw()}}
- if(d.delow){var od=(S.owed||[]).filter(function(o){return String(o.id)===d.delow})[0];if(od&&confirm(od.paid?'Remove this entry? Your balance will not change.':'Remove this entry? The amount will go back to your balance.')){if(!od.paid)S.bal=r2(num(S.bal)+od.a);S.owed=S.owed.filter(function(o){return o!==od});save();draw()}}
+ if(d.addow){var oa=r2(num($('oa').value)),on=$('on').value.trim()||'Someone';if(oa>0){S.owed=S.owed||[];S.owed.push({id:Date.now(),n:on,t:oa,a:oa,d:T,paid:false});save();draw()}}
+ if(d.owpd){var ox=(S.owed||[]).filter(function(o){return String(o.id)===d.owpd})[0];if(ox){if(!ox.paid){ox.paid=true;ox.pa=ox.a}else{ox.paid=false;ox.pa=0}save();draw()}}
+ if(d.delow){var od=(S.owed||[]).filter(function(o){return String(o.id)===d.delow})[0];if(od&&confirm(od.paid?'Remove this entry? Your balance will not change.':'Remove this entry? The amount will go back to your balance.')){S.del=S.del||{};S.del[od.id]=1;S.owed=S.owed.filter(function(o){return o!==od});save();draw()}}
  if(d.copy){copy(d.copy==='r'?report():d.copy==='y'?reportFor(yest()):d.copy==='w'?weekReport(weekStart(now)):JSON.stringify(S));t.textContent='Copied'}
  if(d.restore){try{var o=JSON.parse($('rs').value);if(o&&o.habits){S=o;save();draw()}}catch(x){t.textContent='Not valid, check the paste'}}});
 document.addEventListener('change',function(e){var t=e.target,d=t.dataset;
@@ -619,7 +625,7 @@ document.addEventListener('change',function(e){var t=e.target,d=t.dataset;
  if(t.id==='born'){S.born=t.value;setBorn(t.value);save();draw();return}if(t.id==='sg'){S.sg=Math.max(30,num(t.value)||120);save();draw();return}if(t.id==='nt'){S.note[T]=t.value;save()}if(t.id==='ln'){S.learn[T]=t.value;save()}if(t.id==='pf'&&t.files[0]){var f=t.files[0],ent={id:Date.now(),n:f.name,s:Math.round(f.size/1024)};S.files[T]=(S.files[T]||[]).concat([ent]);save();if(S.driveUrl&&f.size<4e6){var fr=new FileReader();fr.onload=function(){PEND[ent.id]={name:f.name.replace(/[\/\\]/g,'_'),data:String(fr.result).split(',')[1]};upPdf(ent.id)};fr.readAsDataURL(f)}else draw()}});
 draw();
 document.addEventListener('input',function(e){var t=e.target;if(t.id==='nt'){S.note[T]=t.value;save();return}if(t.id==='ln'){S.learn[T]=t.value;save();return}var k=t.dataset&&t.dataset.sl;if(!k)return;var v=+t.value,mx=+t.max;if(k==='water'){S.water[T]=v;$('wl').textContent=v}else{S.study[T]=v;$('sl').textContent=v}t.style.setProperty('--v',(v/mx*100)+'%');save()});
-setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=function(o){for(var k in o){if(k!=='tab')S[k]=o[k]}setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.pays)S.pays=[];var wasOld=S.mv!==3;migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(wasOld)save();draw();setTimeout(autoDrive,1500)};
+setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=function(o){for(var k in o){if(k!=='tab')S[k]=o[k]}setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.pays)S.pays=[];var wasOld=S.mv!==4;migrate();migrate4();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(wasOld)save();draw();setTimeout(autoDrive,1500)};
 })();
 </script>
 <div id="login"><div class="lbox"><div class="lt">⬡ Hex OS</div><p id="lmsg" class="small">Checking login…</p>
