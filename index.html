@@ -69,6 +69,7 @@ img,pre,table{max-width:100%}
 .hrow input[type=checkbox]:checked{background:var(--ok);border-color:var(--ok)}
 .hrow input[type=checkbox]:checked::after{transform:rotate(-45deg) scale(1)}
 .hdone .nm{opacity:.6;text-decoration:line-through}
+.ht{width:100%;border-collapse:collapse;font-size:13px}.ht td,.ht th{padding:6px 5px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.ht th{font-weight:600;color:var(--mut,#667085)}
 </style></head><body><main><div class="top"><div><h1>⬡ Hex OS</h1><p class="small" id="dt"></p><p class="small" id="dst"></p></div><div class="tbtn"><button id="so" aria-label="Sign out" title="Sign out">🔒</button><button data-th="1" aria-label="Switch light or dark">🌓</button></div></div><div id="v"></div></main>
 <nav id="nav"></nav>
 <script>
@@ -433,8 +434,8 @@ function dsSave(){try{localStorage.setItem(DSK,JSON.stringify(DS))}catch(e){}}
 function setSt(m){DS.st=m;dsSave();['dst','dst2'].forEach(function(i){var e=$(i);if(e)e.textContent=m})}
 function hhmm(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
 function driveSend(p,cb){if(!S.driveUrl||!S.driveTok){cb('Link Drive in the More tab first');return}p.token=S.driveTok;
- var body=JSON.stringify(p),ac=window.AbortController?new AbortController():null,tm=ac?setTimeout(function(){ac.abort()},90000):0,o={method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body};if(ac)o.signal=ac.signal;if(p.kind==='day'&&body.length<60000)o.keepalive=true;
- fetch(S.driveUrl,o).then(function(r){clearTimeout(tm);return r.text()}).then(function(t){var j;try{j=JSON.parse(t)}catch(e){cb('Drive replied with a web page, not data. Redeploy the script as a new version with access set to Anyone');return}cb(j.ok?'':(j.error||'Drive error'),j)}).catch(function(e){clearTimeout(tm);cb('Could not reach Drive ('+(e.message||e)+'). In Apps Script: Deploy > Manage deployments > edit > Who has access = Anyone, then Deploy and paste the new /exec link here')})}
+ var body=JSON.stringify(p),ac=window.AbortController?new AbortController():null,tm=ac?setTimeout(function(){ac.abort()},90000):0,o={method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body};if(ac)o.signal=ac.signal;if(p.kind==='day'&&body.length<60000&&document.visibilityState==='hidden')o.keepalive=true;
+ (function go(){fetch(S.driveUrl,o).then(function(r){clearTimeout(tm);return r.text()}).then(function(t){var j;try{j=JSON.parse(t)}catch(e){cb('Drive replied with a web page, not data. Redeploy the script as a new version with access set to Anyone');return}cb(j.ok?'':(j.error||'Drive error'),j)}).catch(function(e){if(o.keepalive){delete o.keepalive;go();return}clearTimeout(tm);cb('Could not reach Drive ('+(e.message||e)+'). In Apps Script: Deploy > Manage deployments > edit > Who has access = Anyone, then Deploy and paste the new /exec link here')})})()}
 var PEND={},UPL=0;
 function setEnt(id,fn){Object.keys(S.files).forEach(function(k){(S.files[k]||[]).forEach(function(e){if(e.id===id)fn(e)})});save();draw()}
 function upPdf(id){var p=PEND[id];if(!p)return;if(navigator.onLine===false){setEnt(id,function(e){e.up='';e.err='You are offline. Tap Retry when you are back online.'});return}
@@ -453,7 +454,7 @@ function pump(){if(!S.driveUrl||!S.driveTok)return;var ks=Object.keys(DS.dirty);
  if(navigator.onLine===false){setSt('📴 Offline: saved in this app, goes to Drive when you are back online');return}
  if(sBusy&&Date.now()-sBusyT<100000)return;
  var k=ks[0],v=DS.dirty[k];sBusy=1;sBusyT=Date.now();
- driveSend({kind:'day',date:k,data:dayData(k)},function(err){sBusy=0;if(err){setSt('⚠️ '+err+' (will retry)');return}clearDirty(k,v);setSt('☁️ Saved to Drive at '+hhmm());if(Object.keys(DS.dirty).length)pump()})}
+ driveSend({kind:'day',date:k,data:dayData(k)},function(err){sBusy=0;if(err){setSt('⚠️ '+err+' (will retry)');return}clearDirty(k,v);setSt('☁️ Saved to Drive at '+hhmm());backupState(false);if(Object.keys(DS.dirty).length)pump()})}
 setInterval(pump,15000);setTimeout(pump,2500);
 function syncDay(k,cb,fin){if(navigator.onLine===false){setSt('📴 Offline: saved in this app, goes to Drive when you are back online');return}var v=DS.dirty[k];driveSend({kind:'day',date:k,final:!!fin,data:dayData(k)},function(err){if(err)setSt('⚠️ '+err);else{setSt('☁️ Saved to Drive at '+hhmm());if(v)clearDirty(k,v);if(fin){DS.fin[k]=1;dsSave()}}if(cb)cb(err)})}
 function syncWeek(st,cb){var ks=weekDays(st);driveSend({kind:'week',start:ks[0],days:ks.map(dayData)},function(err){if(!err){DS.wk[ks[0]]=1;dsSave()}if(cb)cb(err)})}
@@ -464,7 +465,60 @@ function rollover(){if(ds(new Date())===T)return;if(UPL>0)return;if(!S.driveUrl|
 function eod(){if(!S.driveUrl||!S.driveTok||UPL>0)return;var n=new Date();if(n.getHours()*60+n.getMinutes()<1435||ds(n)!==T||DS.fin[T])return;syncDay(T,function(err){if(!err&&n.getDay()===0)syncWeek(weekStart(n))},true)}
 setInterval(rollover,30000);setInterval(eod,30000);window.addEventListener('online',function(){autoDrive();pump()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){if(S.driveUrl&&S.driveTok&&Object.keys(DS.dirty).length)syncDay(T)}else{rollover();pump()}});(function(){var e=$('dst');if(e&&S.driveUrl&&DS.st)e.textContent=DS.st})();
-function driveCard(){return '<div class="card"><h2>☁️ Google Drive</h2><p class="small">Everything you write is saved in this app first, so it works offline. It goes to your Drive within 15 seconds (when you are offline it waits and sends when you are back). At 11:55 pm a daily report PDF is made, and on Sunday night a weekly report PDF. Look in Drive: Hex OS > Daily Reports and Weekly Reports.</p><p id="dst2" style="margin:6px 0"><b>'+esc(DS.st||(S.driveUrl?'Not saved yet today':'Not linked yet'))+'</b></p><input type="text" id="du" placeholder="Web app URL (ends in /exec)" value="'+esc(S.driveUrl||'')+'" autocomplete="off"><input type="password" id="dk" placeholder="'+(S.driveTok?'Secret word saved (type to change)':'Secret word')+'" autocomplete="new-password" style="margin-top:8px"><p class="fl"><button class="p" data-dsave="1">Link Drive</button><button data-ds="1">☁️ Save now + today\'s report</button><button data-dw="1">📅 Make this week\'s report</button></p></div>'}
+/* ===== sync safety, Drive restore, history ===== */
+var DATEKEYS=['log','water','study','done','mood','note','learn','files','ps'];
+function mergeState(a,b){var o={},k;a=a||{};b=b||{};for(k in b)o[k]=b[k];for(k in a)o[k]=a[k];
+ DATEKEYS.forEach(function(f){var x=b[f]||{},y=a[f]||{},m={},d,h;for(d in x)m[d]=x[d];
+  for(d in y){if(f==='log'&&x[d]&&typeof x[d]==='object'&&y[d]&&typeof y[d]==='object'){var mm={};for(h in x[d])mm[h]=x[d][h];for(h in y[d])mm[h]=y[d][h];m[d]=mm}else m[d]=y[d]}
+  o[f]=m});return o}
+function hexBlank(s){if(!s)return true;var f=['log','water','study','done','mood','note','learn'],i,k,v;
+ for(i=0;i<f.length;i++){var o=s[f[i]]||{};for(k in o){v=o[k];if(v&&(typeof v!=='object'||Object.keys(v).some(function(h){return v[h]})))return false}}
+ return !(s.spend||[]).length}
+function stableStr(v){if(v===null||typeof v!=='object')return JSON.stringify(v);if(Array.isArray(v))return '['+v.map(stableStr).join(',')+']';return '{'+Object.keys(v).sort().map(function(k){return JSON.stringify(k)+':'+stableStr(v[k])}).join(',')+'}'}
+function hexSame(a,b){function c(x){var o={},k;for(k in x)if(k!=='tab')o[k]=x[k];return o}return stableStr(c(a))===stableStr(c(b))}
+window.hexMerge=mergeState;window.hexBlank=hexBlank;window.hexSame=hexSame;
+function backupState(force){if(!S.driveUrl||!S.driveTok||hexBlank(S))return;
+ if(!force){if(DS.bkOld&&Date.now()-DS.bkOld<3600000)return;if(Date.now()-(DS.bk||0)<600000)return}
+ var c={},k;for(k in S)if(k!=='driveUrl'&&k!=='driveTok'&&k!=='tab')c[k]=S[k];
+ driveSend({kind:'state',data:c},function(err){if(err==='Unknown request'){DS.bkOld=Date.now();dsSave();return}if(!err){DS.bk=Date.now();DS.bkOld=0;dsSave()}})}
+function mergeDay(d){if(!d||!d.date)return 0;var k=d.date,n=0,l=S.log[k]||{};
+ (d.habits||[]).forEach(function(h){var x=S.habits.filter(function(y){return y[1]===h[0]})[0];if(x&&h[1]&&!l[x[0]]){l[x[0]]=true;n++}});
+ if(n)S.log[k]=l;
+ if(d.mood&&!S.mood[k]){S.mood[k]=d.mood;n++}
+ if((d.study||0)>(S.study[k]||0)){S.study[k]=d.study;n++}
+ if((d.water||0)>(S.water[k]||0)){S.water[k]=d.water;n++}
+ if(d.lessonDone&&!S.done[k]){S.done[k]=true;n++}
+ if(d.note&&!S.note[k]){S.note[k]=d.note;n++}
+ if(d.learn&&!S.learn[k]){S.learn[k]=d.learn;n++}
+ return n}
+var ARB=0;
+function driveRestore(auto,done){
+ if(!S.driveUrl||!S.driveTok){if(done)done("Link Drive first");return}
+ if(ARB)return;ARB=1;var blank=hexBlank(S),base=S.driveUrl+(S.driveUrl.indexOf("?")<0?"?":"&")+"token="+encodeURIComponent(S.driveTok);
+ function get(a){return fetch(base+"&action="+a).then(function(r){return r.text()}).then(function(t){var j;try{j=JSON.parse(t)}catch(e){throw new Error("Drive replied with a web page. Redeploy the script with access set to Anyone")}if(!j.ok)throw new Error(j.error||"Drive error");return j})}
+ setSt("⬇️ Getting your data back from Drive...");
+ get("state").then(function(j){
+  if(!j.v||j.v<3)throw new Error("Update the Drive script to the new version (Code.gs), then Deploy > New version");
+  var msg="";
+  if(j.state){if(blank){var m=j.state;m.driveUrl=S.driveUrl;m.driveTok=S.driveTok;window.hexApply(m);msg="your full backup"}else{var m2=mergeState(S,j.state);if(!hexSame(m2,S)){m2.driveUrl=S.driveUrl;m2.driveTok=S.driveTok;window.hexApply(m2);msg="missing data"}}}
+  return fetch(base+"&action=days&limit="+(blank?400:30)).then(function(r){return r.text()}).then(function(t){var r=JSON.parse(t),n=0;(r.days||[]).forEach(function(d){n+=mergeDay(d)});
+   if(n||msg){save();draw();setSt("⬇️ Restored "+(msg||"daily data")+(n?" + "+n+" entries":"")+" at "+hhmm())}else if(!auto)setSt("✅ Everything is already up to date");
+   DS.ar=ds(new Date());dsSave();ARB=0;if(done)done("")})
+ }).catch(function(e){ARB=0;setSt("⚠️ Drive restore: "+(e.message||e));if(done)done(e.message||String(e))})}
+function autoRestore(){if(!S.driveUrl||!S.driveTok||navigator.onLine===false)return;if(!hexBlank(S)&&DS.ar===ds(new Date()))return;driveRestore(true)}
+function restoreDrive(btn){var old=btn.textContent;btn.textContent="Checking Drive...";btn.disabled=true;driveRestore(false,function(){btn.textContent=old;btn.disabled=false})}
+setTimeout(autoRestore,6000);setTimeout(autoRestore,25000);
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible")setTimeout(autoRestore,1500)});window.addEventListener("online",function(){setTimeout(autoRestore,1500)});
+function histCard(){var i,k,l,d,rows="",wr="";
+ for(i=0;i<14;i++){k=dk(i);l=S.log[k]||{};d=new Date(now);d.setDate(d.getDate()-i);
+  rows+='<tr><td>'+esc(d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"}))+'</td><td>'+esc(S.mood[k]||"-")+'</td><td>'+S.habits.filter(function(h){return l[h[0]]}).length+'/'+S.habits.length+'</td><td>'+(S.study[k]||0)+'m</td><td>'+(S.water[k]||0)+'</td><td>'+(S.done[k]?"✓":"-")+'</td><td><b>'+score(k)+'%</b></td></tr>'}
+ var ws=weekStart(now);
+ for(i=0;i<8;i++){var st=new Date(ws);st.setDate(st.getDate()-7*i);var ks=weekDays(st),hd=0,stu=0,wa=0,ls=0,jn=0,sc=[];
+  ks.forEach(function(k2){if(k2>T)return;var l2=S.log[k2]||{};hd+=S.habits.filter(function(h){return l2[h[0]]}).length;stu+=S.study[k2]||0;wa+=S.water[k2]||0;if(S.done[k2])ls++;if(S.note[k2]||S.learn[k2])jn++;sc.push(score(k2))});
+  var en=new Date(st);en.setDate(en.getDate()+6);var nn=Math.max(1,sc.length);
+  wr+='<tr><td>'+esc(st.toLocaleDateString(undefined,{day:"numeric",month:"short"})+" - "+en.toLocaleDateString(undefined,{day:"numeric",month:"short"}))+'</td><td>'+hd+'/'+S.habits.length*sc.length+'</td><td>'+stu+'m</td><td>'+Math.round(wa/nn)+'</td><td>'+ls+'/'+sc.length+'</td><td>'+jn+'/'+sc.length+'</td><td><b>'+avg(sc)+'%</b></td></tr>'}
+ return '<div class="card"><h2>📅 Daily history</h2><div style="overflow-x:auto"><table class="ht"><tr><th>Day</th><th>Mood</th><th>Habits</th><th>Study</th><th>Water</th><th>Lesson</th><th>Score</th></tr>'+rows+'</table></div></div><div class="card"><h2>🗓️ Weekly history</h2><div style="overflow-x:auto"><table class="ht"><tr><th>Week</th><th>Habits</th><th>Study</th><th>Water/day</th><th>Lessons</th><th>Journal</th><th>Avg</th></tr>'+wr+'</table></div><p class="small">Weeks run Monday to Sunday. Water is the daily average in ml.</p></div>'}
+function driveCard(){return '<div class="card"><h2>☁️ Google Drive</h2><p class="small">Everything you write is saved in this app first, so it works offline. It goes to your Drive within 15 seconds (when you are offline it waits and sends when you are back). At 11:55 pm a daily report PDF is made, and on Sunday night a weekly report PDF. Look in Drive: Hex OS > Daily Reports and Weekly Reports.</p><p id="dst2" style="margin:6px 0"><b>'+esc(DS.st||(S.driveUrl?'Not saved yet today':'Not linked yet'))+'</b></p><input type="text" id="du" placeholder="Web app URL (ends in /exec)" value="'+esc(S.driveUrl||'')+'" autocomplete="off"><input type="password" id="dk" placeholder="'+(S.driveTok?'Secret word saved (type to change)':'Secret word')+'" autocomplete="new-password" style="margin-top:8px"><p class="fl"><button class="p" data-dsave="1">Link Drive</button><button data-ds="1">☁️ Save now + today\'s report</button><button data-drest="1">⬇️ Check Drive now</button><button data-dw="1">📅 Make this week\'s report</button></p></div>'}
 function vToday(){var L=lesson(),w=S.water[T]||0,st=S.study[T]||0,l=S.log[T]||{},M=money(),dn=!!S.done[T],pc=Math.round(lived()/total()*100),b=BOOK[L.i];
  var h='<div class="card hero"><div class="ring" style="--p:'+pc+'"><b>'+pc+'%</b></div><div><div class="hello">'+greet()+' ✨</div><div class="small">of 65 years lived</div><p style="margin:8px 0 0">📅 <b>'+lived().toLocaleString()+'</b> days lived<br>🌅 '+(total()-lived()).toLocaleString()+' days left</p></div></div>';
  h+='<div class="card"><h2>💭 How are you today?</h2><div class="fl">'+moodBtns()+'</div></div>'+newsCard();
@@ -501,7 +555,7 @@ function vJournal(){var h='<div class="card hero"><div><div class="small">'+now.
   h+='<div class="card"><h2>🗓️ Past days</h2>';var any=0;for(var j=1;j<=14;j++){var d=new Date(now);d.setDate(d.getDate()-j);var k=ds(d);if(S.note[k]||S.learn[k]||S.mood[k]){any=1;h+='<div class="row" style="align-items:flex-start"><div style="min-width:64px"><b>'+d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+'</b><br><span class="small">'+d.toLocaleDateString(undefined,{weekday:'short'})+'</span></div><span class="nm"><span class="small">'+esc(S.mood[k]||'')+'</span><br>'+esc(((S.note[k]||'')+' '+(S.learn[k]||'')).trim().slice(0,160))+'</span></div>'}}
  return h+(any?'':'<p class="small">Nothing saved yet. Write today\'s entry above.</p>')+'</div>'}
 function report(){var M=money(),L=lesson();return 'Daily report '+T+'\nHabits: '+habitsDone()+'/'+S.habits.length+'\nStudy: '+(S.study[T]||0)+' min\nWater: '+(S.water[T]||0)+' ml\nLesson: '+L.topic+' ('+(S.done[T]?'done':'not done')+')\nSpent today: '+aed(M.ts)+'. Balance: '+aed(M.bal)+'. Debt left: '+aed(M.debt)+'\nMood: '+(S.mood[T]||'-')+'\nLearned: '+(S.learn[T]||'-')+'\nFiles: '+((S.files[T]||[]).map(function(f){return f.n}).join(', ')||'-')+'\nThoughts: '+(S.note[T]||'-')}
-function vMe(){var ws=weekStart(now);return driveCard()+'<div class="card"><h2>📊 Today\'s report</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">'+esc(report())+'</pre><p><button class="p" data-copy="r">Copy today</button> <button data-copy="y">Copy yesterday</button></p></div><div class="card"><h2>🗓️ This week</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">'+esc(weekReport(ws))+'</pre><p><button class="p" data-copy="w">Copy week</button></p></div>'}
+function vMe(){var ws=weekStart(now);return histCard()+driveCard()+'<div class="card"><h2>📊 Today\'s report</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">'+esc(report())+'</pre><p><button class="p" data-copy="r">Copy today</button> <button data-copy="y">Copy yesterday</button></p></div><div class="card"><h2>🗓️ This week</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">'+esc(weekReport(ws))+'</pre><p><button class="p" data-copy="w">Copy week</button></p></div>'}
 function detailCard(L){var i=L.i,t=Math.min(5,Math.floor((i%30)/5)),k=i%5,h='';
  if(L.m===0){var d=DET[t];h='<div class="card"><h2>📝 Step by step: '+esc(d[0])+' (day '+(k+1)+' of 5)</h2><p>'+esc(d[1][k])+'</p><p class="small">Plan about 2 hours: 30 min reading, 60 min practice, 30 min notes in the Journal tab.</p></div>'}
  else h='<div class="card"><h2>📝 Step by step</h2><p class="small">Detailed tap-by-tap lessons for month '+(L.m+1)+' are added month by month. For today, work on "'+esc(L.topic)+'" in your QuickBooks practice file and Excel, then write what you learned in the Journal tab.</p></div>';
@@ -538,7 +592,8 @@ document.addEventListener('click',function(e){var t=(e.target.closest&&e.target.
  
  if(d.dsave){var du=$('du').value.trim(),dk=$('dk').value;if(du)S.driveUrl=du;if(dk)S.driveTok=dk;save();t.textContent='Testing…';fetch(S.driveUrl+(S.driveUrl.indexOf('?')<0?'?':'&')+'token='+encodeURIComponent(S.driveTok||'')).then(function(r){return r.text()}).then(function(x){var j;try{j=JSON.parse(x)}catch(e){t.textContent='⚠️ Script not public: set access to Anyone';return}t.textContent=j.ok?((j.v||0)>=2?'✅ Linked':'⚠️ Linked, but the Google script is the OLD version. Paste the new Code.gs, then Deploy > Manage deployments > pencil > New version > Deploy'):'⚠️ '+(j.error||'error');if(j.ok)syncDay(T)}).catch(function(e){t.textContent='⚠️ Could not reach script ('+(e.message||e)+')'});return}
  if(d.dw){t.textContent='Making…';syncWeek(weekStart(new Date()),function(err){t.textContent=err?'⚠️ Failed, see status':'✅ Week report made'});return}
- if(d.ds){t.textContent='Saving…';syncDay(T,function(err){t.textContent=err?'⚠️ Failed, see status':'✅ Saved to Drive'},true);return}
+ if(d.ds){t.textContent='Saving…';syncDay(T,function(err){t.textContent=err?'⚠️ Failed, see status':'✅ Saved to Drive';if(!err)backupState(true)},true);return}
+ if(d.drest){restoreDrive(t);return}
  if(d.np){S.proj=((S.proj||0)+1)%PROJ.length;save();draw()}
  if(d.done){S.done[T]=!S.done[T];save();draw()}
  if(d.w){S.water[T]=Math.max(0,(S.water[T]||0)+ +d.w);save();draw()}
@@ -564,7 +619,7 @@ document.addEventListener('change',function(e){var t=e.target,d=t.dataset;
  if(t.id==='born'){S.born=t.value;setBorn(t.value);save();draw();return}if(t.id==='sg'){S.sg=Math.max(30,num(t.value)||120);save();draw();return}if(t.id==='nt'){S.note[T]=t.value;save()}if(t.id==='ln'){S.learn[T]=t.value;save()}if(t.id==='pf'&&t.files[0]){var f=t.files[0],ent={id:Date.now(),n:f.name,s:Math.round(f.size/1024)};S.files[T]=(S.files[T]||[]).concat([ent]);save();if(S.driveUrl&&f.size<4e6){var fr=new FileReader();fr.onload=function(){PEND[ent.id]={name:f.name.replace(/[\/\\]/g,'_'),data:String(fr.result).split(',')[1]};upPdf(ent.id)};fr.readAsDataURL(f)}else draw()}});
 draw();
 document.addEventListener('input',function(e){var t=e.target;if(t.id==='nt'){S.note[T]=t.value;save();return}if(t.id==='ln'){S.learn[T]=t.value;save();return}var k=t.dataset&&t.dataset.sl;if(!k)return;var v=+t.value,mx=+t.max;if(k==='water'){S.water[T]=v;$('wl').textContent=v}else{S.study[T]=v;$('sl').textContent=v}t.style.setProperty('--v',(v/mx*100)+'%');save()});
-setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=function(o){for(var k in o)S[k]=o[k];setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.pays)S.pays=[];var wasOld=S.mv!==3;migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(wasOld)save();draw();setTimeout(autoDrive,1500)};
+setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=function(o){for(var k in o){if(k!=='tab')S[k]=o[k]}setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.pays)S.pays=[];var wasOld=S.mv!==3;migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(wasOld)save();draw();setTimeout(autoDrive,1500)};
 })();
 </script>
 <div id="login"><div class="lbox"><div class="lt">⬡ Hex OS</div><p id="lmsg" class="small">Checking login…</p>
@@ -572,21 +627,25 @@ setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=fu
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,doc,getDoc,setDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const cfg={apiKey:"AIzaSyD1tbCPpC8ofdSqcxd40MnfrgZvUu6pgP4",authDomain:"hex-os-6cebf.firebaseapp.com",projectId:"hex-os-6cebf",storageBucket:"hex-os-6cebf.firebasestorage.app",messagingSenderId:"865562586212",appId:"1:865562586212:web:f987f00369c5b979258371"};
 const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 const L=document.getElementById('login'),F=document.getElementById('lf'),M=document.getElementById('lmsg'),SO=document.getElementById('so');
-let ref=null,timer=null,lastT=0,synced=false;
+let ref=null,timer=null,lastT=0,synced=false,snapOn=false;
 async function push(S){lastT=Date.now();await setDoc(ref,{json:JSON.stringify(S),t:lastT});try{localStorage.setItem('hexos-mt',String(Math.max(+localStorage.getItem('hexos-mt')||0,lastT)))}catch(e){}}
 async function pull(first){const s=await getDoc(ref);synced=true;const lm=+localStorage.getItem('hexos-mt')||0;
- if(s.exists()){const d=s.data();
-  if(d.t>lm&&d.t>lastT){lastT=d.t;window.hexApply(JSON.parse(d.json));try{localStorage.setItem('hexos-mt',String(d.t))}catch(e){}}
-  else if(lm>d.t){await push(window.hexGet())}
- }else if(first||lm>0){await push(window.hexGet())}}
+ const local=window.hexGet();
+ if(s.exists()){const d=s.data();let remote;try{remote=JSON.parse(d.json)}catch(e){return}
+  if(!local.driveUrl&&remote.driveUrl)window.hexApply({driveUrl:remote.driveUrl,driveTok:remote.driveTok});const lb=window.hexBlank(local),rb=window.hexBlank(remote);
+  if(lb&&!rb){lastT=d.t;window.hexApply(remote);try{localStorage.setItem('hexos-mt',String(d.t))}catch(e){}return}
+  if(rb&&!lb){await push(local);return}
+  if(d.t>lm&&d.t>lastT){const m=window.hexMerge(remote,local);lastT=d.t;window.hexApply(m);try{localStorage.setItem('hexos-mt',String(d.t))}catch(e){}if(!window.hexSame(m,remote))await push(window.hexGet())}
+  else if(lm>d.t){const m=window.hexMerge(local,remote);if(!window.hexSame(m,local))window.hexApply(m);if(!window.hexSame(m,remote))await push(window.hexGet())}
+ }else if((first||lm>0)&&!window.hexBlank(local)){await push(local)}}
 onAuthStateChanged(auth,async u=>{
  if(u){ref=doc(db,'users',u.uid,'app','state');
   const hasLocal=!!localStorage.getItem('hexos-v3');
-  const unlock=()=>{window.hexCloud=S=>{clearTimeout(timer);timer=setTimeout(()=>(synced?push(S):pull(false)).catch(()=>{}),1500)};L.style.display='none';SO.style.display='block'};
+  const unlock=()=>{window.hexCloud=S=>{clearTimeout(timer);timer=setTimeout(()=>pull(false).catch(()=>{}),1500)};if(!snapOn){snapOn=true;try{onSnapshot(ref,sn=>{if(!sn.metadata.hasPendingWrites&&sn.exists()&&sn.data().t>lastT)pull(false).catch(()=>{})})}catch(e){}}L.style.display='none';SO.style.display='block'};
   try{
    if(navigator.onLine===false&&hasLocal){unlock();return}
    await Promise.race([pull(true),new Promise((_,j)=>setTimeout(()=>j({code:'timeout'}),6000))]);unlock()
