@@ -1,4 +1,4 @@
-const V='hexos-v1';
+const V='hexos-v2';
 const SHELL=['index.html','manifest.webmanifest','icon-180.png','icon-192.png','icon-512.png'];
 const FB='https://www.gstatic.com/firebasejs/10.12.2/';
 const CDN=[FB+'firebase-app.js',FB+'firebase-auth.js',FB+'firebase-firestore.js'];
