@@ -8,6 +8,7 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#131d30;--ink:#e8eef7;--mute:#98a8c0;--line:#25324a;--acc:#6f93ff;--gold:#f0b429;--ok:#4fc58a;--bad:#ff7b6b;--sh:none}}
 :root[data-theme="dark"]{--bg:#0b1220;--card:#131d30;--ink:#e8eef7;--mute:#98a8c0;--line:#25324a;--acc:#6f93ff;--gold:#f0b429;--ok:#4fc58a;--bad:#ff7b6b;--sh:none}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+#moodbg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.5}:root[data-theme="dark"] #moodbg{opacity:.62}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #moodbg{opacity:.62}}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans",system-ui,sans-serif}
 main{max-width:680px;margin:0 auto;padding:16px 14px 96px}
 h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0}h1{font-size:26px}h2{font-size:19px;margin-bottom:8px}h3{font-size:16px}
@@ -70,7 +71,7 @@ img,pre,table{max-width:100%}
 .hrow input[type=checkbox]:checked::after{transform:rotate(-45deg) scale(1)}
 .hdone .nm{opacity:.6;text-decoration:line-through}
 .ht{width:100%;border-collapse:collapse;font-size:13px}.ht td,.ht th{padding:6px 5px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.ht th{font-weight:600;color:var(--mut,#667085)}
-</style></head><body><main><div class="top"><div><h1>⬡ Hex OS</h1><p class="small" id="dt"></p><p class="small" id="dst"></p></div><div class="tbtn"><button id="so" aria-label="Sign out" title="Sign out">🔒</button><button data-th="1" aria-label="Switch light or dark">🌓</button></div></div><div id="v"></div></main>
+</style></head><body><canvas id="moodbg" aria-hidden="true"></canvas><main><div class="top"><div><h1>⬡ Hex OS</h1><p class="small" id="dt"></p><p class="small" id="dst"></p></div><div class="tbtn"><button id="so" aria-label="Sign out" title="Sign out">🔒</button><button data-bg="1" aria-label="Animated background on or off" title="Animated background">🌦️</button><button data-th="1" aria-label="Switch light or dark">🌓</button></div></div><div id="v"></div></main>
 <nav id="nav"></nav>
 <script>
 (function(){
@@ -95,10 +96,10 @@ setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120
 var OPEN_BAL=r2(843.25+49.72),CUT=1794165600000;
 function migrate4(){if(S.mv>=4)return;S.del=S.del||{};['spend','pays','owed'].forEach(function(f){(S[f]||[]).forEach(function(x){S.del[x.id]=1})});S.spendOld=(S.spendOld||[]).concat(S.spend||[]);S.spend=[];S.pays=[];S.owed=[];S.cfg=S.cfg||{};S.mv=4;delete S.bal}
 function migrate5(){if(S.mv>=5)return;S.del=S.del||{};['spend','pays','owed'].forEach(function(f){(S[f]||[]).forEach(function(x){S.del[x.id]=1})});S.spendOld=(S.spendOld||[]).concat(S.spend||[]);S.spend=[];S.pays=[];S.owed=[];S.cfg=S.cfg||{};S.cfg.debtPaid=0;S.mv=5}
-var SEEDS=[[1009, "Put glue wallet: take it from the warehouse to the glue", ""], [1010, "Find fruit juice: glass crusher, frozen fruit or puree, ice, sparkling water, mint", ""]];function seedTodos(){if(S.sd>=2)return;var old=[1001,1002,1003,1004,1005,1006,1007,1008,1011,1012,1013,1014,1015];S.del=S.del||{};S.todos=S.todos||[];if(!S.sd){}old.forEach(function(i){S.del[i]=1});S.todos=S.todos.filter(function(o){return old.indexOf(o.id)<0});SEEDS.forEach(function(x){if(!S.todos.some(function(o){return o.id===x[0]})&&!S.del[x[0]])S.todos.push({id:x[0],t:x[1],due:x[2],done:false,dd:''})});S.sd=2}
+var SEEDS=[[1009, "Put glue wallet: take it from the warehouse to the glue", ""], [1010, "Find fruit juice: glass crusher, frozen fruit or puree, ice, sparkling water, mint", ""]];function seedTodos(){if(S.sd===2){(S.todos||[]).forEach(function(o){if(o.id===1009||o.id===1010)o.due=''});S.sd=3;return}if(S.sd>=3)return;var old=[1001,1002,1003,1004,1005,1006,1007,1008,1011,1012,1013,1014,1015];S.del=S.del||{};S.todos=S.todos||[];if(!S.sd){}old.forEach(function(i){S.del[i]=1});S.todos=S.todos.filter(function(o){return old.indexOf(o.id)<0});SEEDS.forEach(function(x){if(!S.todos.some(function(o){return o.id===x[0]})&&!S.del[x[0]])S.todos.push({id:x[0],t:x[1],due:x[2],done:false,dd:''})});S.sd=3}
 function calcBal(){var b=OPEN_BAL;(S.spend||[]).forEach(function(x){if(x.id>CUT)b-=num(x.a)});(S.pays||[]).forEach(function(x){if(x.id>CUT)b-=num(x.a)});(S.owed||[]).forEach(function(o){if(o.id>CUT)b-=num(o.a)-(o.paid?num(o.pa):0);else if(o.paid&&o.pt>CUT)b+=num(o.pa)});return r2(b)}
 window.hexTest={calcBal:calcBal,reportFor:function(k){return reportFor(k)},tab:function(t){S.tab=t;draw()}};
-var _o=S.mv!==5||S.sd!==2;migrate();migrate4();migrate5();seedTodos();if(_o)try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+var _o=S.mv!==5||S.sd!==3;migrate();migrate4();migrate5();seedTodos();if(_o)try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('hexos-mt',String(Date.now()))}catch(e){}if(window.hexCloud)window.hexCloud(S);queueDrive()}
 function $(i){return document.getElementById(i)}
 function esc(s){var d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML}
@@ -536,7 +537,7 @@ function histCard(){var i,k,l,d,rows="",wr="";
  return '<div class="card"><h2>📅 Daily history</h2><div style="overflow-x:auto"><table class="ht"><tr><th>Day</th><th>Mood</th><th>Habits</th><th>Study</th><th>Water</th><th>Lesson</th><th>Score</th></tr>'+rows+'</table></div></div><div class="card"><h2>🗓️ Weekly history</h2><div style="overflow-x:auto"><table class="ht"><tr><th>Week</th><th>Habits</th><th>Study</th><th>Water/day</th><th>Lessons</th><th>Journal</th><th>Avg</th></tr>'+wr+'</table></div><p class="small">Weeks run Monday to Sunday. Water is the daily average in ml.</p></div>'}
 function driveCard(){var lk=!!(S.driveUrl&&S.driveTok);
  var inputs='<input type="text" id="du" placeholder="Web app URL (ends in /exec)" value="'+esc(S.driveUrl||'')+'" autocomplete="off"><input type="password" id="dk" placeholder="'+(S.driveTok?'Secret word saved (type to change)':'Secret word')+'" autocomplete="new-password" style="margin-top:8px"><p class="fl"><button class="p" data-dsave="1">'+(lk?'Save new link':'Link Drive')+'</button></p>';
- return '<div class="card"><h2>☁️ Google Drive</h2><p class="small">Everything you write is saved in this app first, so it works offline. It goes to Drive by itself within 15 seconds, and when you are offline it waits and sends when you are back. The daily report PDF (11:55 pm) and the weekly report PDF (Sunday night) are made automatically in Drive.</p><p class="small"><b>Save now</b> sends everything to Drive at once. <b>Backup</b> brings all your data back from Drive, for example on a new device or after a reset.</p><p class="small">Drive folder <b>Hex OS</b>: data, Backups, Daily Reports, Weekly Reports, PDFs.</p><p id="dst2" style="margin:6px 0"><b>'+esc(DS.st||(lk?'Not saved yet today':'Not linked yet'))+'</b></p>'+(lk?'<p class="good" style="margin:6px 0">✅ Linked. No need to enter this again on this device.</p><details><summary>Change link or secret word</summary>'+inputs+'</details>':inputs)+'<p class="fl"><button class="p" data-ds="1">☁️ Save now</button><button data-drest="1">🛟 Backup: restore from Drive</button></p></div>'}
+ return '<div class="card"><h2>☁️ Google Drive</h2><p id="dst2" style="margin:6px 0"><b>'+esc(DS.st||(lk?'Not saved yet':'Not linked yet'))+'</b></p><p class="fl"><button class="p" data-ds="1">☁️ Save now</button><button data-drest="1">🛟 Backup</button></p>'+(lk?'<details><summary>Link settings</summary>'+inputs+'</details>':inputs)+'</div>'}
 function vToday(){var L=lesson(),w=S.water[T]||0,st=S.study[T]||0,l=S.log[T]||{},M=money(),dn=!!S.done[T],pc=Math.round(lived()/total()*100),b=BOOK[L.i];
  var h='<div class="card hero"><div class="ring" style="--p:'+pc+'"><b>'+pc+'%</b></div><div><div class="hello">'+greet()+' ✨</div><div class="small">of 65 years lived</div><p style="margin:8px 0 0">📅 <b>'+lived().toLocaleString()+'</b> days lived<br>🌅 '+(total()-lived()).toLocaleString()+' days left</p></div></div>';
  h+='<div class="card"><h2>💭 How are you today?</h2><div class="fl">'+moodBtns()+'</div></div>'+newsCard();
@@ -594,9 +595,272 @@ function weekReport(st){var ks=weekDays(st),ds_=ks.map(dayData),hs=0,ht=0,sp=0,s
 function yest(){var d=new Date(now);d.setDate(d.getDate()-1);return ds(d)}
 function repCard(){return ''}
 var V={today:vToday,plan:vPlan,money:vMoney,journal:vJournal,learn:vLearn,ideas:vIdeas,me:function(){return chartsCard()+vIdeas()+vMe()}},TABS=[['today','Today','🏠'],['plan','Plan','🗺️'],['money','Money','💰'],['journal','Journal','📓'],['learn','Learn','📖'],['me','More','✨']];
-function draw(){if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);$('dt').textContent=now.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('v').className=(S.tab==='learn'||S.tab==='journal')?'one':'';$('v').innerHTML=V[S.tab]();$('nav').innerHTML=TABS.map(function(t){return '<button data-tab="'+t[0]+'" aria-current="'+(S.tab===t[0])+'"><span>'+t[2]+'</span>'+t[1]+'</button>'}).join('')}
+var MOOD_SCENES = {
+  Great:   { name:'Sunrise',   sky:['#1a2a4a','#5a3a6a','#f0a060'], sun:'#ffd27a', weather:'sunrise' },
+  Good:    { name:'Clear sky', sky:['#2f5bea','#5b8def','#a8d0ff'], sun:'#fff3b0', weather:'clear' },
+  Okay:    { name:'Clouds',    sky:['#6b7a8f','#9aa8bd','#c5cfdc'], sun:'#e8e2d0', weather:'cloudy' },
+  Low:     { name:'Rain',      sky:['#2a3340','#4a5560','#6a7580'], sun:'#8a949e', weather:'rain' },
+  Rough:   { name:'Storm',     sky:['#15191f','#2a3038','#3a4250'], sun:'#5a606e', weather:'storm' }
+};
+
+function moodBackground(canvas, opts){
+  var ctx = canvas.getContext('2d');
+  var W=0,H=0,dpr=Math.min(window.devicePixelRatio||1,2);
+  var scene = MOOD_SCENES[opts.mood] || MOOD_SCENES.Good;
+  var progress = Math.min(1, opts.habitsDone/(opts.total||12)); // 0..1
+  var animOn = opts.animOn && !opts.reduceMotion;
+  var dark = opts.dark;
+  var t = 0;
+  var particles = [];
+  var clouds = [];
+  var confetti = [];
+  var lightningT = 0;
+  var lastCelebrate = -1;
+  var rafId = null;
+
+  function resize(){
+    var r = canvas.getBoundingClientRect();
+    W = r.width; H = r.height;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    initParticles();
+  }
+
+  function initParticles(){
+    particles = []; clouds = [];
+    var w = scene.weather;
+    if(w==='rain'||w==='storm'){
+      var n = w==='storm'?180:110;
+      for(var i=0;i<n;i++) particles.push({x:Math.random()*W,y:Math.random()*H,len:8+Math.random()*14,sp:4+Math.random()*5,op:.2+Math.random()*.3});
+    }
+    if(w==='cloudy'||w==='rain'||w==='storm'){
+      var cn = w==='cloudy'?5:4;
+      for(var c=0;c<cn;c++) clouds.push({x:Math.random()*W,y:20+Math.random()*H*0.35,s:60+Math.random()*80,sp:0.15+Math.random()*0.3,op:.3+Math.random()*.3});
+    }
+    if(w==='sunrise'||w==='clear'){
+      for(var b=0;b<(w==='clear'?3:2);b++) clouds.push({x:Math.random()*W,y:H*0.15+Math.random()*H*0.2,s:50+Math.random()*60,sp:0.1+Math.random()*0.15,op:.12+Math.random()*.1});
+    }
+  }
+
+  function lerpColor(a,b,p){
+    var pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1),16);
+    var r=Math.round((pa>>16&255)*(1-p)+(pb>>16&255)*p);
+    var g=Math.round((pa>>8&255)*(1-p)+(pb>>8&255)*p);
+    var bl=Math.round((pa&255)*(1-p)+(pb&255)*p);
+    return 'rgb('+r+','+g+','+bl+')';
+  }
+
+  function drawSky(){
+    var s=scene.sky;
+    // brightness scales with progress; dim at 0 habits, vivid at 12
+    var dim = 0.35 + progress*0.65;
+    var g = ctx.createLinearGradient(0,0,0,H);
+    var c0 = lerpColor(dark?'#060a12':'#dfe5ee', s[0], dim);
+    var c1 = lerpColor(dark?'#0e1420':'#eef2f8', s[1], dim);
+    var c2 = lerpColor(dark?'#141c2c':'#f5f7fb', s[2], dim);
+    g.addColorStop(0,c0); g.addColorStop(0.5,c1); g.addColorStop(1,c2);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+
+  function drawSun(){
+    var w=scene.weather;
+    if(w==='rain'||w==='storm') return;
+    var sx = w==='sunrise' ? W*0.5 : W*0.78;
+    var sy = w==='sunrise' ? H*0.62 - progress*H*0.15 : H*0.22;
+    var sr = (w==='sunrise'?28:22) + progress*14;
+    // glow grows with habits
+    var glowR = sr*(2.2 + progress*2.5);
+    var gg = ctx.createRadialGradient(sx,sy,0,sx,sy,glowR);
+    gg.addColorStop(0, scene.sun);
+    gg.addColorStop(0.3, scene.sun+'66');
+    gg.addColorStop(1, scene.sun+'00');
+    ctx.fillStyle=gg; ctx.fillRect(0,0,W,H);
+    // sun disc
+    ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2);
+    ctx.fillStyle=scene.sun; ctx.fill();
+    // sunrise rays
+    if(w==='sunrise' && animOn){
+      ctx.save(); ctx.translate(sx,sy);
+      for(var i=0;i<8;i++){
+        ctx.rotate(Math.PI/4);
+        var rl = sr*1.5 + Math.sin(t*0.001+i)*10 + progress*30;
+        ctx.fillStyle=scene.sun+'22';
+        ctx.fillRect(sr*1.1,-2,rl,4);
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawCloud(c){
+    ctx.save();
+    ctx.globalAlpha=c.op * (0.5 + progress*0.5);
+    ctx.fillStyle = dark ? '#1a2233' : 'rgba(255,255,255,0.85)';
+    var s=c.s;
+    ctx.beginPath();
+    ctx.arc(c.x,c.y,s*0.5,0,Math.PI*2);
+    ctx.arc(c.x+s*0.4,c.y-s*0.1,s*0.4,0,Math.PI*2);
+    ctx.arc(c.x+s*0.8,c.y,s*0.45,0,Math.PI*2);
+    ctx.arc(c.x+s*0.3,c.y+s*0.15,s*0.35,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawClouds(){
+    if(!animOn){ clouds.forEach(drawCloud); return; }
+    clouds.forEach(function(c){
+      c.x += c.sp;
+      if(c.x > W + c.s) c.x = -c.s;
+      drawCloud(c);
+    });
+  }
+
+  function drawRain(){
+    if(scene.weather!=='rain' && scene.weather!=='storm') return;
+    ctx.strokeStyle = 'rgba(180,200,230,'+(0.3+progress*0.3)+')';
+    ctx.lineWidth=1.2;
+    particles.forEach(function(p){
+      ctx.beginPath();
+      ctx.moveTo(p.x,p.y);
+      ctx.lineTo(p.x-2,p.y+p.len);
+      ctx.stroke();
+      if(animOn){
+        p.y += p.sp; p.x -= 1;
+        if(p.y>H){ p.y=-p.len; p.x=Math.random()*W; }
+      }
+    });
+  }
+
+  function drawLightning(){
+    if(scene.weather!=='storm') return;
+    if(!animOn) return;
+    if(lightningT<=0){
+      if(Math.random()<0.004) lightningT=8;
+      return;
+    }
+    lightningT--;
+    ctx.fillStyle='rgba(255,255,255,'+(lightningT/8*0.5)+')';
+    ctx.fillRect(0,0,W,H);
+    // bolt
+    if(lightningT>4){
+      ctx.strokeStyle='rgba(255,255,220,0.85)'; ctx.lineWidth=2.5;
+      ctx.beginPath();
+      var bx=W*0.3+Math.random()*W*0.4, by=0;
+      ctx.moveTo(bx,by);
+      for(var y=0;y<H*0.6;y+=20){ bx+=(Math.random()-0.5)*30; ctx.lineTo(bx,y); }
+      ctx.stroke();
+    }
+  }
+
+  function drawHorizon(){
+    if(scene.weather==='rain'||scene.weather==='storm'){
+      // dark ground haze
+      var g=ctx.createLinearGradient(0,H*0.7,0,H);
+      g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,'+(0.2+progress*0.15)+')');
+      ctx.fillStyle=g; ctx.fillRect(0,H*0.7,W,H*0.3);
+    }
+  }
+
+  function spawnConfetti(){
+    confetti = [];
+    var colors=['#f0b429','#2f5bea','#4fc58a','#ff7b6b','#6f93ff','#ffd27a'];
+    for(var i=0;i<80;i++){
+      confetti.push({
+        x:W*0.5+(Math.random()-0.5)*60,
+        y:H*0.45,
+        vx:(Math.random()-0.5)*7,
+        vy:-4-Math.random()*6,
+        g:0.18,
+        sz:4+Math.random()*5,
+        rot:Math.random()*Math.PI,
+        vr:(Math.random()-0.5)*0.3,
+        col:colors[i%colors.length],
+        life:120
+      });
+    }
+  }
+
+  function drawConfetti(){
+    if(!confetti.length) return;
+    confetti.forEach(function(c){
+      c.x+=c.vx; c.y+=c.vy; c.vy+=c.g; c.rot+=c.vr; c.life--;
+      ctx.save(); ctx.translate(c.x,c.y); ctx.rotate(c.rot);
+      ctx.fillStyle=c.col; ctx.globalAlpha=Math.max(0,c.life/120);
+      ctx.fillRect(-c.sz/2,-c.sz/2,c.sz,c.sz*0.5);
+      ctx.restore();
+    });
+    confetti = confetti.filter(function(c){return c.life>0 && c.y<H+20});
+  }
+
+  function drawStatic(){
+    // when animation is off, draw one calm frame
+    drawSky(); drawSun(); drawClouds(); drawRain(); drawHorizon();
+  }
+
+  function frame(){
+    t++;
+    ctx.clearRect(0,0,W,H);
+    drawSky(); drawSun(); drawClouds(); drawRain(); drawLightning(); drawHorizon();
+    // celebration trigger
+    if(progress>=1 && lastCelebrate<0){
+      lastCelebrate=0; spawnConfetti();
+    }
+    if(progress<1) lastCelebrate=-1;
+    drawConfetti();
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function renderStatic(){
+    ctx.clearRect(0,0,W,H);
+    drawStatic();
+    if(progress>=1){ spawnConfetti(); drawConfetti(); }
+  }
+
+  function start(){
+    cancel();
+    if(animOn) rafId=requestAnimationFrame(frame);
+    else renderStatic();
+  }
+  function cancel(){ if(rafId){ cancelAnimationFrame(rafId); rafId=null; } }
+
+  resize();
+  start();
+
+  // Observe prefers-reduced-motion live
+  var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function onMQ(){ if(opts.reduceMotion===undefined) opts.reduceMotion=mq.matches; }
+
+  return {
+    update:function(newOpts){
+      var sceneChanged = newOpts.mood !== opts.mood;
+      var progChanged  = newOpts.habitsDone !== opts.habitsDone;
+      opts = Object.assign(opts,newOpts);
+      scene = MOOD_SCENES[opts.mood] || scene;
+      progress = Math.min(1, opts.habitsDone/(opts.total||12));
+      animOn = opts.animOn && !opts.reduceMotion;
+      dark = opts.dark;
+      if(sceneChanged) initParticles();
+      if(!animOn && (sceneChanged||progChanged)) renderStatic();
+    },
+    resize:resize,
+    start:start,
+    cancel:cancel,
+    destroy:cancel
+  };
+}
+var BGON=true;try{BGON=localStorage.getItem('hexbg')!=='0'}catch(e){}
+var bgi=null,RMQ=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
+function isDark(){var a=document.documentElement.getAttribute('data-theme');return a?a==='dark':(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
+function bgSync(){var c=$('moodbg'),tb=document.querySelector('[data-bg]');if(!c)return;if(tb)tb.style.opacity=BGON?'1':'.45';
+ if(!BGON){c.style.display='none';if(bgi)bgi.cancel();return}
+ c.style.display='block';var l=S.log[T]||{},n=0;S.habits.forEach(function(h){if(l[h[0]])n++});
+ var o={mood:S.mood[T]||'Good',habitsDone:n,total:S.habits.length,animOn:!document.hidden,reduceMotion:RMQ.matches,dark:isDark()};
+ try{if(!bgi)bgi=moodBackground(c,o);else{bgi.update(o)}bgi.start()}catch(e){}}
+document.addEventListener('visibilitychange',function(){if(bgi&&BGON){if(document.hidden)bgi.cancel();else bgSync()}});
+window.addEventListener('resize',function(){if(bgi&&BGON){bgi.resize();bgi.start()}});
+function draw(){if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);$('dt').textContent=now.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});$('v').className=(S.tab==='learn'||S.tab==='journal')?'one':'';$('v').innerHTML=V[S.tab]();$('nav').innerHTML=TABS.map(function(t){return '<button data-tab="'+t[0]+'" aria-current="'+(S.tab===t[0])+'"><span>'+t[2]+'</span>'+t[1]+'</button>'}).join('');bgSync()}
 function copy(t){try{navigator.clipboard.writeText(t)}catch(e){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(x){}a.remove()}}
 document.addEventListener('click',function(e){var t=(e.target.closest&&e.target.closest('button'))||e.target,d=t.dataset;if(!d)return;
+ if(d.bg){BGON=!BGON;try{localStorage.setItem('hexbg',BGON?'1':'0')}catch(e){}bgSync();return}
  if(d.th){S.theme=(document.documentElement.getAttribute('data-theme')==='dark'||(!S.theme&&matchMedia('(prefers-color-scheme: dark)').matches))?'light':'dark';save();draw();return}
  if(d.addtd){var tv=$('tdn').value.trim();if(tv){S.todos=S.todos||[];S.todos.push({id:Date.now(),t:tv,due:$('tdd').value||'',done:false,dd:''});save();draw()}return}
  if(d.deltd){var tx=(S.todos||[]).filter(function(o){return String(o.id)===d.deltd})[0];if(tx){S.del=S.del||{};S.del[tx.id]=1;S.todos=S.todos.filter(function(o){return o!==tx});save();draw()}return}
@@ -645,7 +909,7 @@ document.addEventListener('change',function(e){var t=e.target,d=t.dataset;
 draw();
 document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='tdn'){var b=document.querySelector('[data-addtd]');if(b)b.click()}});
 document.addEventListener('input',function(e){var t=e.target;if(t.id==='nt'){S.note[T]=t.value;save();return}if(t.id==='ln'){S.learn[T]=t.value;save();return}var k=t.dataset&&t.dataset.sl;if(!k)return;var v=+t.value,mx=+t.max;if(k==='water'){S.water[T]=v;$('wl').textContent=v}else{S.study[T]=v;$('sl').textContent=v}t.style.setProperty('--v',(v/mx*100)+'%');save()});
-setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=function(o){for(var k in o){if(k!=='tab')S[k]=o[k]}setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.pays)S.pays=[];if(!S.todos)S.todos=[];var wasOld=S.mv!==5||S.sd!==2;migrate();migrate4();migrate5();seedTodos();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(wasOld)save();draw();setTimeout(autoDrive,1500)};
+setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=function(o){for(var k in o){if(k!=='tab')S[k]=o[k]}setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.pays)S.pays=[];if(!S.todos)S.todos=[];var wasOld=S.mv!==5||S.sd!==3;migrate();migrate4();migrate5();seedTodos();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(wasOld)save();draw();setTimeout(autoDrive,1500)};
 })();
 </script>
 <div id="login"><div class="lbox"><div class="lt">⬡ Hex OS</div><p id="lmsg" class="small">Checking login…</p>
