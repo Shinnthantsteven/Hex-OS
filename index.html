@@ -8,7 +8,7 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#131d30;--ink:#e8eef7;--mute:#98a8c0;--line:#25324a;--acc:#6f93ff;--gold:#f0b429;--ok:#4fc58a;--bad:#ff7b6b;--sh:none}}
 :root[data-theme="dark"]{--bg:#0b1220;--card:#131d30;--ink:#e8eef7;--mute:#98a8c0;--line:#25324a;--acc:#6f93ff;--gold:#f0b429;--ok:#4fc58a;--bad:#ff7b6b;--sh:none}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
-#moodbg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.5}:root[data-theme="dark"] #moodbg{opacity:.62}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #moodbg{opacity:.62}}
+#moodbg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans",system-ui,sans-serif}
 main{max-width:680px;margin:0 auto;padding:16px 14px 96px}
 h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0}h1{font-size:26px}h2{font-size:19px;margin-bottom:8px}h3{font-size:16px}
@@ -71,6 +71,31 @@ img,pre,table{max-width:100%}
 .hrow input[type=checkbox]:checked::after{transform:rotate(-45deg) scale(1)}
 .hdone .nm{opacity:.6;text-decoration:line-through}
 .ht{width:100%;border-collapse:collapse;font-size:13px}.ht td,.ht th{padding:6px 5px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.ht th{font-weight:600;color:var(--mut,#667085)}
+
+/* ===== calm glass look: the weather shows through soft cards ===== */
+:root{--glass:rgba(255,255,255,.58);--glass-b:rgba(255,255,255,.7);--sh:0 8px 28px rgba(15,27,45,.12)}
+:root[data-theme="dark"]{--glass:rgba(14,22,38,.55);--glass-b:rgba(255,255,255,.10);--sh:0 8px 28px rgba(0,0,0,.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--glass:rgba(14,22,38,.55);--glass-b:rgba(255,255,255,.10);--sh:0 8px 28px rgba(0,0,0,.35)}}
+.card,.ledger,.top,nav{background:var(--glass);border:1px solid var(--glass-b);box-shadow:var(--sh);-webkit-backdrop-filter:blur(7px) saturate(1.15);backdrop-filter:blur(7px) saturate(1.15)}
+.card,.ledger{border-radius:20px;padding:18px}
+.ledger{border-left:1px solid var(--glass-b)}
+.top{border-radius:20px;padding:12px 16px;margin-bottom:14px}
+.adv{border-left:1px solid var(--glass-b)}
+h2{font-size:17px;margin-bottom:10px}
+.row{border-bottom:1px solid rgba(120,130,150,.16)}
+.hero{background:var(--glass);gap:14px;padding:14px 18px}
+.ring{width:60px;height:60px}.ring b{width:46px;height:46px;font-size:15px}
+.hello{font-size:20px}
+.moods{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.moods button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 2px;font-size:12px;border-radius:14px;background:transparent}
+.moods button span{font-size:28px;line-height:1.1}
+.moods button.on{background:var(--ok);color:#fff;border-color:var(--ok);box-shadow:0 4px 14px rgba(20,128,74,.35)}
+button.p{box-shadow:0 4px 14px color-mix(in srgb,var(--acc) 35%,transparent)}
+nav button[aria-current=true]{background:color-mix(in srgb,var(--acc) 15%,transparent);box-shadow:none;border-radius:14px}
+nav{border-top:1px solid var(--glass-b)}
+@media (max-width:899px){nav{left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom,0px));border-radius:22px;padding:4px}}
+@media (min-width:900px){nav{border-right:1px solid var(--glass-b);border-radius:0}#v .card.hero{display:flex}.ring{width:60px;height:60px}.ring b{width:46px;height:46px;font-size:15px}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--glass:rgba(255,255,255,.95)}:root[data-theme="dark"]{--glass:rgba(19,29,48,.95)}}
 </style></head><body><canvas id="moodbg" aria-hidden="true"></canvas><main><div class="top"><div><h1>⬡ Hex OS</h1><p class="small" id="dt"></p><p class="small" id="dst"></p></div><div class="tbtn"><button id="so" aria-label="Sign out" title="Sign out">🔒</button><button data-bg="1" aria-label="Animated background on or off" title="Animated background">🌦️</button><button data-th="1" aria-label="Switch light or dark">🌓</button></div></div><div id="v"></div></main>
 <nav id="nav"></nav>
 <script>
@@ -78,6 +103,7 @@ img,pre,table{max-width:100%}
 var KEY='hexos-v3',now=new Date(),BORN=new Date(2003,4,16),END=new Date(2068,4,16);function setBorn(){}
 function ds(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(x<10?'0':'')+x}
 var T=ds(now);
+var PLANTXT="THE GOAL\nBecome a cost controller, at Kings Group or another business.\nI choose one of Dubai or Maldives. Every other country is dropped.\nVacation: Vietnam for the whole of April 2027, then back to Dubai.\nFirst, pay the Tabby debt: AED 8,000 within 4 months. That is AED 2,000 a month, finished by 8 March 2027.\n\nACCOUNTING STUDY\n300 lessons from 5 Oct 2026, 2 hours a day, until about August 2027. The months are listed below.\nMonths 9 and 10: exam preparation, LCCI or ACCA. Confirm the exact exam and date with an exam centre.\nI learn on QuickBooks Desktop and Online and bring my work laptop home to keep learning.\nCost controller skills I am also learning at work: month-end stock-wise reconciliation, Qashio and cash flow, the A/R and A/P cycle, profit and loss, and bill-wise purchase and stock reports. Nobody teaches them, so I study them myself.\n\nWORK PROJECTS\nStock take project: a new sheet each month that is quick to set up. The update steps sit in the app menu and link to the inventory tracker. Data stays in the sheet, secure, with no CSV export to Supabase.\nVariance tracker: reads the sales, purchase and stock reports and graphs the variance per item, including new items, compared with last month. It shows why stock is off: wrong item or case and packing codes, wrong price set-up, purchases or sales posted wrong. Margins can reach 25%. It must be free, with a great interface, not cheap Python.\n\nSIDE PROJECTS\nProgramming with AI: build the stock take app and the inventory tracker.\nCSV fashion website for Venkat: already built. He wants product details with a direct WhatsApp link to the customer, which needs back-end work. I learn logistics from Ramesh.\nHex OS: my simple private app. Daily summary, morning news, life-years-left, journal, learning report, repo check, and a manual expense tracker. No reading of messages or email, for privacy.\nExport business (later idea, not now): my brother already exports from Myanmar to Saudi Arabia and the Middle East, and I am learning logistics at Chef2Chef.\n\nHABITS AND HEALTH\nMy bet with Allah: no sugar, no energy drinks and no masturbation, every day.\nReplace doom scrolling and porn with vocab, phrases, writing my thoughts, and coding games in Swift. Free while I pay the debt. No vape; it is worse than energy drinks.\nFitness: push-ups, real food, fruit and water. A scooter and car licence in case I come back to Dubai.\nHealth: I stopped caffeine. I will see a doctor and check what my cheaper insurance covers.";
 var IDEAS=['📦 Finish my stock app','📊 Variance tracker graphs','🚢 Export business idea','🤖 Cursor 10 min daily: build a tiny piece of one idea','🏋️ Push-up ladder: add one rep every week','🍋 Sugar-free lime, mint and fruit soda as my daily drink'];
 var HAB=[['fruit','🍎 Fruit'],['read','📖 Read one page'],['vocab','🔤 One new vocabulary word'],['duo','🦉 Duolingo 5 min'],['prog','💻 Programming 15 min'],['cursor','⌨️ Cursor project 10 min'],['breath','🌬️ Breathing 6 min'],['caff','☕ No caffeine'],['lust','🛡️ No lust'],['isha','🕌 Pray Isha'],['swim','🏊 Swim or exercise (optional days)'],['push','💪 Push-ups']];
 var DET=[
@@ -92,7 +118,7 @@ var S={tab:'today',habits:HAB,
 log:{},water:{},goal:1500,study:{},start:'2026-10-05',done:{},mood:{},note:{},learn:{},spend:[],
 ideas:IDEAS,ideaDone:{},theme:'',cfg:{income:0,rent:0,transport:0,food:0,debtPay:0,debtTotal:0,debtPaid:0}};
 try{var r=(localStorage.getItem(KEY)||localStorage.getItem('growth-ledger-v2'));if(r){var p=JSON.parse(r);for(var k in p)S[k]=p[k]}}catch(e){}
-setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.todos)S.todos=[];function migrate(){if(S.mv>=3)return;if(S.mv===2){S.mv=3;S.spend=(S.spend||[]).filter(function(x){return x.a!==8.5});return}S.mv=3;S.spendOld=S.spend||[];S.spend=[];S.pays=[];S.bal=1218.59;S.cfg=S.cfg||{};S.cfg.debtTotal=8000;S.cfg.debtPaid=0;S.balFrom=T}
+setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.todos)S.todos=[];if(S.plan===undefined)S.plan=PLANTXT;function migrate(){if(S.mv>=3)return;if(S.mv===2){S.mv=3;S.spend=(S.spend||[]).filter(function(x){return x.a!==8.5});return}S.mv=3;S.spendOld=S.spend||[];S.spend=[];S.pays=[];S.bal=1218.59;S.cfg=S.cfg||{};S.cfg.debtTotal=8000;S.cfg.debtPaid=0;S.balFrom=T}
 var OPEN_BAL=r2(843.25+49.72),CUT=1794165600000;
 function migrate4(){if(S.mv>=4)return;S.del=S.del||{};['spend','pays','owed'].forEach(function(f){(S[f]||[]).forEach(function(x){S.del[x.id]=1})});S.spendOld=(S.spendOld||[]).concat(S.spend||[]);S.spend=[];S.pays=[];S.owed=[];S.cfg=S.cfg||{};S.mv=4;delete S.bal}
 function migrate5(){if(S.mv>=5)return;S.del=S.del||{};['spend','pays','owed'].forEach(function(f){(S[f]||[]).forEach(function(x){S.del[x.id]=1})});S.spendOld=(S.spendOld||[]).concat(S.spend||[]);S.spend=[];S.pays=[];S.owed=[];S.cfg=S.cfg||{};S.cfg.debtPaid=0;S.mv=5}
@@ -134,7 +160,7 @@ function total(){return Math.floor((END-BORN)/864e5)}
 
 
 var MOODS=[['Great','😄'],['Good','🙂'],['Okay','😐'],['Low','😔'],['Rough','😣']];
-function moodBtns(){return MOODS.map(function(x){return '<button data-mood="'+x[0]+'" class="'+(S.mood[T]===x[0]?'on':'')+'">'+x[1]+' '+x[0]+'</button>'}).join('')}
+function moodBtns(){return MOODS.map(function(x){return '<button data-mood="'+x[0]+'" class="'+(S.mood[T]===x[0]?'on':'')+'"><span>'+x[1]+'</span>'+x[0]+'</button>'}).join('')}
 function doneBefore(){return Object.keys(S.done).filter(function(k){return S.done[k]&&k<T}).length}
 var FILES=[['Accounting-Equation.xlsx','accounting equation explained simple'],['Debit-Credit-Practice.xlsx','debit and credit rules for beginners'],['Journal-Entries.xlsx','how to write a journal entry accounting'],['Trial-Balance.xlsx','how to prepare a trial balance step by step'],['QB-Navigation-Notes.docx','QuickBooks Desktop navigation tutorial'],['Invoice-Cycle-Notes.docx','QuickBooks create invoice receive payment tutorial']];
 var PROJ=[['📦 Stock Take v2 for your company',['Open Cursor, tap File > Open Folder and pick your Stock-take folder.','Create a file named PLAN.md and list what the monthly sheet needs: items, opening, counted, difference, date.','In the Cursor chat type: Add a New month button that copies the item list into a fresh sheet. Press Enter and read the change.','Open index.html in the browser and test with fake data.','Tap Source Control, type a message, tap Commit.']],
@@ -428,9 +454,10 @@ function greet(){var h=now.getHours();return h<12?'Good morning':h<18?'Good afte
 var nBusy=false;
 var NEWS_URL='https://script.google.com/macros/s/AKfycbxQ1hRnnAsctRMJC1Oe7hB5Kpp8ttyri0KHtmzB8Mu1y-tX5KdsRWm5-qsepZXbpyJX/exec';
 function fetchNews(){if(nBusy)return;nBusy=true;fetch(NEWS_URL).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(j){var it=(j.items||[]).slice(0,5);if(!it.length)throw new Error('No headlines yet');S.news={d:T,items:it};S.newsErr='';nBusy=false;save();if(S.tab==='today')draw()}).catch(function(e){S.newsErr=String(e.message||e);S.news={d:T,items:(S.news&&S.news.items)||[]};nBusy=false;if(S.tab==='today')draw()})}
-function newsCard(){var h='<div class="card news"><h2>🌍 World headlines</h2>';
- if(!S.news||S.news.d!==T)fetchNews();
+function newsCard(){if(!S.news||S.news.d!==T)fetchNews();
  var it=(S.news&&S.news.items)||[];
+ if(!it.length&&S.newsErr)return '<p class="small" style="text-align:center;margin:4px 0 12px">🌍 Headlines are not available right now. <button data-nr="1">Try again</button></p>';
+ var h='<div class="card news"><h2>🌍 World headlines</h2>';
  if(!it.length)h+='<p class="small">'+(S.newsErr?'Could not load news: '+esc(S.newsErr):'Loading headlines…')+'</p>';
  it.forEach(function(x,i){h+='<div class="row"><span class="n">'+(i+1)+'</span><span class="nm"><a href="'+(/^https?:/.test(x.u)?esc(x.u).replace(/"/g,'%22'):'#')+'" target="_blank" rel="noopener noreferrer">'+esc(x.t)+'</a><br><span class="small">'+esc(x.s)+'</span></span></div>'});
  return h+'<p class="small"><button data-nr="1">🔄 Refresh</button></p></div>'}
@@ -539,22 +566,23 @@ function driveCard(){var lk=!!(S.driveUrl&&S.driveTok);
  var inputs='<input type="text" id="du" placeholder="Web app URL (ends in /exec)" value="'+esc(S.driveUrl||'')+'" autocomplete="off"><input type="password" id="dk" placeholder="'+(S.driveTok?'Secret word saved (type to change)':'Secret word')+'" autocomplete="new-password" style="margin-top:8px"><p class="fl"><button class="p" data-dsave="1">'+(lk?'Save new link':'Link Drive')+'</button></p>';
  return '<div class="card"><h2>☁️ Google Drive</h2><p id="dst2" style="margin:6px 0"><b>'+esc(DS.st||(lk?'Not saved yet':'Not linked yet'))+'</b></p><p class="fl"><button class="p" data-ds="1">☁️ Save now</button><button data-drest="1">🛟 Backup</button></p>'+(lk?'<details><summary>Link settings</summary>'+inputs+'</details>':inputs)+'</div>'}
 function vToday(){var L=lesson(),w=S.water[T]||0,st=S.study[T]||0,l=S.log[T]||{},M=money(),dn=!!S.done[T],pc=Math.round(lived()/total()*100),b=BOOK[L.i];
- var h='<div class="card hero"><div class="ring" style="--p:'+pc+'"><b>'+pc+'%</b></div><div><div class="hello">'+greet()+' ✨</div><div class="small">of 65 years lived</div><p style="margin:8px 0 0">📅 <b>'+lived().toLocaleString()+'</b> days lived<br>🌅 '+(total()-lived()).toLocaleString()+' days left</p></div></div>';
- h+='<div class="card"><h2>💭 How are you today?</h2><div class="fl">'+moodBtns()+'</div></div>'+newsCard();
- h+='<div class="card"><h2>📚 Today\'s learning</h2><p><b>'+(b?'Page '+(L.i+1)+': '+esc(b[0]):esc(L.topic))+'</b></p><p class="small">'+(dn?'✅ Finished today. ':'Not finished yet. ')+'The full page, study tools and focus timer are in the Learn tab.</p><button class="p" data-tab="learn">📖 Open in Learn</button></div>';
+ var h='<div class="card hero"><div class="ring" style="--p:'+pc+'"><b>'+pc+'%</b></div><div><div class="hello">'+greet()+' ✨</div><div class="small">'+lived().toLocaleString()+' days lived · '+(total()-lived()).toLocaleString()+' days left of 65 years</div></div></div>';
+ h+='<div class="card"><h2>How are you today?</h2><div class="moods">'+moodBtns()+'</div></div>';
+ h+='<div class="card"><h2>✅ Habits ('+habitsDone()+'/'+S.habits.length+')</h2>'+S.habits.map(function(x){return '<label class="row hrow'+(l[x[0]]?' hdone':'')+'"><input type="checkbox" data-h="'+x[0]+'" '+(l[x[0]]?'checked':'')+' aria-label="'+esc(x[1])+'"><span class="nm">'+esc(x[1])+'</span></label>'}).join('')+'<p class="small">Tap to tick when done. Tapped by mistake? Tap again to untick. Resets every day.</p></div>';
  var wm=S.goal,sm=S.sg;
  h+='<div class="card"><h2>🌤️ Today</h2><div class="fl" style="justify-content:space-between"><span>💧 Water</span><b><span id="wl">'+w+'</span> / '+wm+' ml</b></div><input type="range" data-sl="water" min="0" max="'+wm+'" step="50" value="'+Math.min(w,wm)+'" style="--v:'+Math.min(100,w/wm*100)+'%" aria-label="Water in ml">';
  h+='<div class="fl" style="justify-content:space-between"><span>📚 Accounting study</span><b><span id="sl">'+st+'</span> / '+sm+' min</b></div><input type="range" data-sl="study" min="0" max="'+sm+'" step="5" value="'+Math.min(st,sm)+'" style="--v:'+Math.min(100,st/sm*100)+'%" aria-label="Study minutes">';
  h+='<div class="row"><span class="nm">💸 Spent today: '+aed(M.ts)+'</span><span>Balance '+aed(M.bal)+'</span></div></div>';
- h+='<div class="card"><h2>✅ Habits ('+habitsDone()+'/'+S.habits.length+')</h2>'+S.habits.map(function(x){return '<label class="row hrow'+(l[x[0]]?' hdone':'')+'"><input type="checkbox" data-h="'+x[0]+'" '+(l[x[0]]?'checked':'')+' aria-label="'+esc(x[1])+'"><span class="nm">'+esc(x[1])+'</span></label>'}).join('')+'<p class="small">Tap to tick when done. Tapped by mistake? Tap again to untick. Resets every day.</p></div>';
+ h+='<div class="card"><h2>📚 Today\'s learning</h2><p><b>'+(b?'Page '+(L.i+1)+': '+esc(b[0]):esc(L.topic))+'</b></p><p class="small">'+(dn?'✅ Finished today. ':'Not finished yet. ')+'The full page, study tools and focus timer are in the Learn tab.</p><button class="p" data-tab="learn">📖 Open in Learn</button></div>';
  var a=[];if(!dn)a.push('📘 Do today\'s page first. It is the biggest step toward your exam.');if(w<wm*0.5)a.push('💧 Water is under half. Drink a glass now.');if(st<sm/2)a.push('⏱️ Study time is under half. Start a focus timer in Learn.');if(habitsDone()<S.habits.length/2)a.push('✅ Habits are under half. Pick two small ones and finish them.');if(!S.mood[T])a.push('💭 Choose your mood so today\'s journal is complete.');if(!a.length)a.push('🌟 Strong day. Write one line in the Journal about what worked.');
- return h+'<div class="card adv"><h2>🧭 Summary and advice</h2><div class="big">'+score(T)+'%</div><div class="small">today\'s score: habits, lesson, study, water</div><ul>'+a.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul><details><summary>Daily report</summary><pre class="dg" style="white-space:pre-wrap">'+esc(report())+'</pre></details><button data-copy="r">Copy report</button> <button data-ds="1">☁️ Save to Drive</button></div>'}
+ return h+'<div class="card adv"><h2>🧭 Summary and advice</h2><div class="big">'+score(T)+'%</div><div class="small">today\'s score: habits, lesson, study, water</div><ul>'+a.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul><details><summary>Daily report</summary><pre class="dg" style="white-space:pre-wrap">'+esc(report())+'</pre></details><button data-copy="r">Copy report</button> <button data-ds="1">☁️ Save to Drive</button></div>'+newsCard()}
+function planCard(){return '<div class="card"><h2>🧭 My future plan</h2><p class="small" style="margin:0 0 8px">Edit anything here. It saves by itself.</p><textarea id="fp" rows="24" style="width:100%;font:inherit;line-height:1.5;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);resize:vertical" aria-label="My future plan">'+esc(S.plan||'')+'</textarea></div>'}
 function todoCard(){var a=(S.todos||[]).filter(function(x){return !x.done}),all=S.todos||[],b=all.filter(function(x){return x.done}).slice(-5).reverse();
  function row(x){return '<div class="row"><input type="checkbox" data-td="'+x.id+'" '+(x.done?'checked':'')+' aria-label="done"><span class="nm" style="'+(x.done?'text-decoration:line-through;opacity:.6':'')+'">'+esc(x.t)+(x.due?' <span class="small'+(!x.done&&x.due<T?' red':'')+'">· due '+x.due.slice(5)+'</span>':'')+'</span><button data-deltd="'+x.id+'">Remove</button></div>'}
  a.sort(function(p,q){var u=p.due||'9',v=q.due||'9';return u<v?-1:u>v?1:p.id-q.id});
  return '<div class="card"><h2>✅ To-do list</h2><p class="small" style="margin:0 0 8px">'+a.length+' to do · '+all.filter(function(x){return x.done}).length+' done. Saved with everything else.</p><div class="fl"><input type="text" id="tdn" placeholder="Add a task" style="flex:2;min-width:160px" autocomplete="off"><input type="date" id="tdd" style="flex:1;min-width:140px" aria-label="Due date (optional)"><button class="p" data-addtd="1">Add</button></div>'+(a.length?a.map(row).join(''):'<p class="small">Nothing to do. Add your first task.</p>')+(b.length?'<details><summary>Done recently</summary>'+b.map(row).join('')+'</details>':'')+'</div>'}
 function vPlan(){var L=lesson(),i=Math.max(0,dayIdx()),dd=Object.keys(S.done).filter(function(k){return S.done[k]}).length;
- var h=todoCard()+'<div class="card"><h2>🗺️ 10-month roadmap</h2><label class="small">Start date<input type="date" id="st" value="'+S.start+'"></label><p>Lesson <b>'+(L.i+1)+'</b> of 300. Lessons done: <b>'+dd+'</b>.</p><div class="bar"><i style="width:'+Math.min(100,dd/3)+'%"></i></div></div><div class="card"><h2>📆 Months</h2>';
+ var h=planCard()+todoCard()+'<div class="card"><h2>🗺️ 10-month roadmap</h2><label class="small">Start date<input type="date" id="st" value="'+S.start+'"></label><p>Lesson <b>'+(L.i+1)+'</b> of 300. Lessons done: <b>'+dd+'</b>.</p><div class="bar"><i style="width:'+Math.min(100,dd/3)+'%"></i></div></div><div class="card"><h2>📆 Months</h2>';
  MON.forEach(function(m,k){h+='<div class="row" style="align-items:flex-start"><span class="nm"><b'+(k===L.m?' class="good"':'')+'>Month '+(k+1)+': '+esc(m[0])+'</b><br><span class="small">'+m[1].map(esc).join('; ')+'</span></span></div>'});
  h+='</div><div class="card"><h2>🔥 Last 30 days</h2><div class="dots">';
  for(var j=29;j>=0;j--){var d=new Date(now);d.setDate(d.getDate()-j);h+='<i class="'+(S.done[ds(d)]?'d ':'')+(j===0?'t':'')+'" title="'+ds(d)+'"></i>'}
@@ -595,258 +623,52 @@ function weekReport(st){var ks=weekDays(st),ds_=ks.map(dayData),hs=0,ht=0,sp=0,s
 function yest(){var d=new Date(now);d.setDate(d.getDate()-1);return ds(d)}
 function repCard(){return ''}
 var V={today:vToday,plan:vPlan,money:vMoney,journal:vJournal,learn:vLearn,ideas:vIdeas,me:function(){return chartsCard()+vIdeas()+vMe()}},TABS=[['today','Today','🏠'],['plan','Plan','🗺️'],['money','Money','💰'],['journal','Journal','📓'],['learn','Learn','📖'],['me','More','✨']];
-var MOOD_SCENES = {
-  Great:   { name:'Sunrise',   sky:['#1a2a4a','#5a3a6a','#f0a060'], sun:'#ffd27a', weather:'sunrise' },
-  Good:    { name:'Clear sky', sky:['#2f5bea','#5b8def','#a8d0ff'], sun:'#fff3b0', weather:'clear' },
-  Okay:    { name:'Clouds',    sky:['#6b7a8f','#9aa8bd','#c5cfdc'], sun:'#e8e2d0', weather:'cloudy' },
-  Low:     { name:'Rain',      sky:['#2a3340','#4a5560','#6a7580'], sun:'#8a949e', weather:'rain' },
-  Rough:   { name:'Storm',     sky:['#15191f','#2a3038','#3a4250'], sun:'#5a606e', weather:'storm' }
-};
-
-function moodBackground(canvas, opts){
-  var ctx = canvas.getContext('2d');
-  var W=0,H=0,dpr=Math.min(window.devicePixelRatio||1,2);
-  var scene = MOOD_SCENES[opts.mood] || MOOD_SCENES.Good;
-  var progress = Math.min(1, opts.habitsDone/(opts.total||12)); // 0..1
-  var animOn = opts.animOn && !opts.reduceMotion;
-  var dark = opts.dark;
-  var t = 0;
-  var particles = [];
-  var clouds = [];
-  var confetti = [];
-  var lightningT = 0;
-  var lastCelebrate = -1;
-  var rafId = null;
-
-  function resize(){
-    var r = canvas.getBoundingClientRect();
-    W = r.width; H = r.height;
-    canvas.width = W*dpr; canvas.height = H*dpr;
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    initParticles();
-  }
-
-  function initParticles(){
-    particles = []; clouds = [];
-    var w = scene.weather;
-    if(w==='rain'||w==='storm'){
-      var n = w==='storm'?180:110;
-      for(var i=0;i<n;i++) particles.push({x:Math.random()*W,y:Math.random()*H,len:8+Math.random()*14,sp:4+Math.random()*5,op:.2+Math.random()*.3});
-    }
-    if(w==='cloudy'||w==='rain'||w==='storm'){
-      var cn = w==='cloudy'?5:4;
-      for(var c=0;c<cn;c++) clouds.push({x:Math.random()*W,y:20+Math.random()*H*0.35,s:60+Math.random()*80,sp:0.15+Math.random()*0.3,op:.3+Math.random()*.3});
-    }
-    if(w==='sunrise'||w==='clear'){
-      for(var b=0;b<(w==='clear'?3:2);b++) clouds.push({x:Math.random()*W,y:H*0.15+Math.random()*H*0.2,s:50+Math.random()*60,sp:0.1+Math.random()*0.15,op:.12+Math.random()*.1});
-    }
-  }
-
-  function lerpColor(a,b,p){
-    var pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1),16);
-    var r=Math.round((pa>>16&255)*(1-p)+(pb>>16&255)*p);
-    var g=Math.round((pa>>8&255)*(1-p)+(pb>>8&255)*p);
-    var bl=Math.round((pa&255)*(1-p)+(pb&255)*p);
-    return 'rgb('+r+','+g+','+bl+')';
-  }
-
-  function drawSky(){
-    var s=scene.sky;
-    // brightness scales with progress; dim at 0 habits, vivid at 12
-    var dim = 0.35 + progress*0.65;
-    var g = ctx.createLinearGradient(0,0,0,H);
-    var c0 = lerpColor(dark?'#060a12':'#dfe5ee', s[0], dim);
-    var c1 = lerpColor(dark?'#0e1420':'#eef2f8', s[1], dim);
-    var c2 = lerpColor(dark?'#141c2c':'#f5f7fb', s[2], dim);
-    g.addColorStop(0,c0); g.addColorStop(0.5,c1); g.addColorStop(1,c2);
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-  }
-
-  function drawSun(){
-    var w=scene.weather;
-    if(w==='rain'||w==='storm') return;
-    var sx = w==='sunrise' ? W*0.5 : W*0.78;
-    var sy = w==='sunrise' ? H*0.62 - progress*H*0.15 : H*0.22;
-    var sr = (w==='sunrise'?28:22) + progress*14;
-    // glow grows with habits
-    var glowR = sr*(2.2 + progress*2.5);
-    var gg = ctx.createRadialGradient(sx,sy,0,sx,sy,glowR);
-    gg.addColorStop(0, scene.sun);
-    gg.addColorStop(0.3, scene.sun+'66');
-    gg.addColorStop(1, scene.sun+'00');
-    ctx.fillStyle=gg; ctx.fillRect(0,0,W,H);
-    // sun disc
-    ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2);
-    ctx.fillStyle=scene.sun; ctx.fill();
-    // sunrise rays
-    if(w==='sunrise' && animOn){
-      ctx.save(); ctx.translate(sx,sy);
-      for(var i=0;i<8;i++){
-        ctx.rotate(Math.PI/4);
-        var rl = sr*1.5 + Math.sin(t*0.001+i)*10 + progress*30;
-        ctx.fillStyle=scene.sun+'22';
-        ctx.fillRect(sr*1.1,-2,rl,4);
-      }
-      ctx.restore();
-    }
-  }
-
-  function drawCloud(c){
-    ctx.save();
-    ctx.globalAlpha=c.op * (0.5 + progress*0.5);
-    ctx.fillStyle = dark ? '#1a2233' : 'rgba(255,255,255,0.85)';
-    var s=c.s;
-    ctx.beginPath();
-    ctx.arc(c.x,c.y,s*0.5,0,Math.PI*2);
-    ctx.arc(c.x+s*0.4,c.y-s*0.1,s*0.4,0,Math.PI*2);
-    ctx.arc(c.x+s*0.8,c.y,s*0.45,0,Math.PI*2);
-    ctx.arc(c.x+s*0.3,c.y+s*0.15,s*0.35,0,Math.PI*2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function drawClouds(){
-    if(!animOn){ clouds.forEach(drawCloud); return; }
-    clouds.forEach(function(c){
-      c.x += c.sp;
-      if(c.x > W + c.s) c.x = -c.s;
-      drawCloud(c);
-    });
-  }
-
-  function drawRain(){
-    if(scene.weather!=='rain' && scene.weather!=='storm') return;
-    ctx.strokeStyle = 'rgba(180,200,230,'+(0.3+progress*0.3)+')';
-    ctx.lineWidth=1.2;
-    particles.forEach(function(p){
-      ctx.beginPath();
-      ctx.moveTo(p.x,p.y);
-      ctx.lineTo(p.x-2,p.y+p.len);
-      ctx.stroke();
-      if(animOn){
-        p.y += p.sp; p.x -= 1;
-        if(p.y>H){ p.y=-p.len; p.x=Math.random()*W; }
-      }
-    });
-  }
-
-  function drawLightning(){
-    if(scene.weather!=='storm') return;
-    if(!animOn) return;
-    if(lightningT<=0){
-      if(Math.random()<0.004) lightningT=8;
-      return;
-    }
-    lightningT--;
-    ctx.fillStyle='rgba(255,255,255,'+(lightningT/8*0.5)+')';
-    ctx.fillRect(0,0,W,H);
-    // bolt
-    if(lightningT>4){
-      ctx.strokeStyle='rgba(255,255,220,0.85)'; ctx.lineWidth=2.5;
-      ctx.beginPath();
-      var bx=W*0.3+Math.random()*W*0.4, by=0;
-      ctx.moveTo(bx,by);
-      for(var y=0;y<H*0.6;y+=20){ bx+=(Math.random()-0.5)*30; ctx.lineTo(bx,y); }
-      ctx.stroke();
-    }
-  }
-
-  function drawHorizon(){
-    if(scene.weather==='rain'||scene.weather==='storm'){
-      // dark ground haze
-      var g=ctx.createLinearGradient(0,H*0.7,0,H);
-      g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,'+(0.2+progress*0.15)+')');
-      ctx.fillStyle=g; ctx.fillRect(0,H*0.7,W,H*0.3);
-    }
-  }
-
-  function spawnConfetti(){
-    confetti = [];
-    var colors=['#f0b429','#2f5bea','#4fc58a','#ff7b6b','#6f93ff','#ffd27a'];
-    for(var i=0;i<80;i++){
-      confetti.push({
-        x:W*0.5+(Math.random()-0.5)*60,
-        y:H*0.45,
-        vx:(Math.random()-0.5)*7,
-        vy:-4-Math.random()*6,
-        g:0.18,
-        sz:4+Math.random()*5,
-        rot:Math.random()*Math.PI,
-        vr:(Math.random()-0.5)*0.3,
-        col:colors[i%colors.length],
-        life:120
-      });
-    }
-  }
-
-  function drawConfetti(){
-    if(!confetti.length) return;
-    confetti.forEach(function(c){
-      c.x+=c.vx; c.y+=c.vy; c.vy+=c.g; c.rot+=c.vr; c.life--;
-      ctx.save(); ctx.translate(c.x,c.y); ctx.rotate(c.rot);
-      ctx.fillStyle=c.col; ctx.globalAlpha=Math.max(0,c.life/120);
-      ctx.fillRect(-c.sz/2,-c.sz/2,c.sz,c.sz*0.5);
-      ctx.restore();
-    });
-    confetti = confetti.filter(function(c){return c.life>0 && c.y<H+20});
-  }
-
-  function drawStatic(){
-    // when animation is off, draw one calm frame
-    drawSky(); drawSun(); drawClouds(); drawRain(); drawHorizon();
-  }
-
-  function frame(){
-    t++;
-    ctx.clearRect(0,0,W,H);
-    drawSky(); drawSun(); drawClouds(); drawRain(); drawLightning(); drawHorizon();
-    // celebration trigger
-    if(progress>=1 && lastCelebrate<0){
-      lastCelebrate=0; spawnConfetti();
-    }
-    if(progress<1) lastCelebrate=-1;
-    drawConfetti();
-    rafId = requestAnimationFrame(frame);
-  }
-
-  function renderStatic(){
-    ctx.clearRect(0,0,W,H);
-    drawStatic();
-    if(progress>=1){ spawnConfetti(); drawConfetti(); }
-  }
-
-  function start(){
-    cancel();
-    if(animOn) rafId=requestAnimationFrame(frame);
-    else renderStatic();
-  }
-  function cancel(){ if(rafId){ cancelAnimationFrame(rafId); rafId=null; } }
-
-  resize();
-  start();
-
-  // Observe prefers-reduced-motion live
-  var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-  function onMQ(){ if(opts.reduceMotion===undefined) opts.reduceMotion=mq.matches; }
-
-  return {
-    update:function(newOpts){
-      var sceneChanged = newOpts.mood !== opts.mood;
-      var progChanged  = newOpts.habitsDone !== opts.habitsDone;
-      opts = Object.assign(opts,newOpts);
-      scene = MOOD_SCENES[opts.mood] || scene;
-      progress = Math.min(1, opts.habitsDone/(opts.total||12));
-      animOn = opts.animOn && !opts.reduceMotion;
-      dark = opts.dark;
-      if(sceneChanged) initParticles();
-      if(!animOn && (sceneChanged||progChanged)) renderStatic();
-    },
-    resize:resize,
-    start:start,
-    cancel:cancel,
-    destroy:cancel
-  };
-}
+var MOOD_SCENES={Great:{name:'Sunny'},Good:{name:'Normal'},Okay:{name:'Cloudy'},Low:{name:'Rain'},Rough:{name:'Storm'}};
+/* Weather background that follows mood: Great sunny, Good normal sky, Okay moving clouds, Low black clouds and rain, Rough storm. More habits done = a little brighter. */
+function moodBackground(canvas,opts){
+ var ctx=canvas.getContext('2d'),dpr=Math.min(window.devicePixelRatio||1,2),W=0,H=0,t=0,raf=0,clouds=[],drops=[],conf=[],flash=0,celeb=-1,bolt=null;
+ var P={Great:{sky:['#1f7cf5','#8fd0ff'],cc:'255,255,255',ca:.92,n:4,sp:.16,rain:0,sun:1},
+  Good:{sky:['#5f9fe3','#cfe4f6'],cc:'255,255,255',ca:.8,n:4,sp:.08,rain:0,sun:0},
+  Okay:{sky:['#6f8199','#b9c3cf'],cc:'238,242,247',ca:.92,n:10,sp:.55,rain:0,sun:0},
+  Low:{sky:['#20262e','#4b545f'],cc:'30,34,41',ca:.96,n:9,sp:.35,rain:150,slant:-1.2,sun:0},
+  Rough:{sky:['#07090d','#222833'],cc:'14,16,21',ca:.98,n:11,sp:.75,rain:340,slant:-4,light:1,sun:0}};
+ function sc(){return P[opts.mood]||P.Good}
+ function prog(){return Math.min(1,(opts.habitsDone||0)/(opts.total||12))}
+ function anim(){return opts.animOn&&!opts.reduceMotion}
+ function init(){var q=sc(),i;clouds=[];drops=[];
+  for(i=0;i<q.n;i++)clouds.push({x:Math.random()*(W+300)-150,y:H*(.04+Math.random()*.42),s:70+Math.random()*110,v:.5+Math.random()*.9,a:.55+Math.random()*.45});
+  for(i=0;i<q.rain;i++)drops.push({x:Math.random()*W,y:Math.random()*H,l:10+Math.random()*16,v:.7+Math.random()*.8})}
+ function resize(){var r=canvas.getBoundingClientRect();W=r.width||innerWidth;H=r.height||innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);init()}
+ function sky(q){var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,q.sky[0]);g.addColorStop(1,q.sky[1]);ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}
+ function sun(q){var pr=prog(),x=W*.78,y=Math.min(H*.17,150),r=34+pr*10;
+  var gg=ctx.createRadialGradient(x,y,0,x,y,r*(5+pr*2));gg.addColorStop(0,'rgba(255,244,190,.95)');gg.addColorStop(.25,'rgba(255,230,140,.45)');gg.addColorStop(1,'rgba(255,230,140,0)');ctx.fillStyle=gg;ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.translate(x,y);ctx.rotate(t*.0016);ctx.strokeStyle='rgba(255,240,170,.45)';ctx.lineWidth=5;ctx.lineCap='round';
+  for(var i=0;i<14;i++){ctx.rotate(Math.PI*2/14);ctx.beginPath();ctx.moveTo(r*1.45,0);ctx.lineTo(r*(2+.25*Math.sin(t*.02+i)),0);ctx.stroke()}ctx.restore();
+  ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.fillStyle='#fff6c8';ctx.fill()}
+ function cloud(c,q){var s=c.s,x=c.x,y=c.y;ctx.fillStyle='rgba('+q.cc+','+(q.ca*c.a)+')';ctx.beginPath();
+  ctx.arc(x,y,s*.32,0,6.283);ctx.arc(x+s*.3,y-s*.14,s*.3,0,6.283);ctx.arc(x+s*.62,y,s*.34,0,6.283);ctx.arc(x+s*.32,y+s*.1,s*.3,0,6.283);ctx.rect(x,y,s*.62,s*.18);ctx.fill()}
+ function rain(q){if(!q.rain)return;ctx.strokeStyle=opts.mood==='Rough'?'rgba(200,215,240,.6)':'rgba(190,205,225,.5)';ctx.lineWidth=opts.mood==='Rough'?1.6:1.3;ctx.beginPath();
+  for(var i=0;i<drops.length;i++){var d=drops[i];ctx.moveTo(d.x,d.y);ctx.lineTo(d.x+q.slant*(d.l/9),d.y+d.l);
+   if(anim()){d.y+=(opts.mood==='Rough'?15:9)*d.v;d.x+=q.slant*d.v*.9;if(d.y>H){d.y=-20;d.x=Math.random()*(W+120)}if(d.x<-40)d.x=W+20}}ctx.stroke()}
+ function lightning(q){if(!q.light)return;
+  if(anim()&&flash<=0&&Math.random()<.007){flash=11;var bx=W*(.15+Math.random()*.7),pts=[[bx,0]],y=0;while(y<H*.55){y+=18+Math.random()*26;bx+=(Math.random()-.5)*46;pts.push([bx,y])}bolt=pts}
+  if(flash>0){ctx.fillStyle='rgba(235,240,255,'+(flash/11*.42)+')';ctx.fillRect(0,0,W,H);
+   if(bolt&&flash>5){ctx.strokeStyle='rgba(255,255,235,.95)';ctx.lineWidth=3;ctx.shadowColor='#bcd4ff';ctx.shadowBlur=18;ctx.beginPath();bolt.forEach(function(p,i){i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])});ctx.stroke();ctx.shadowBlur=0}
+   if(anim())flash--}}
+ function confetti(){if(!conf.length)return;conf.forEach(function(c){c.x+=c.vx;c.y+=c.vy;c.vy+=.18;c.r+=c.vr;c.l--;ctx.save();ctx.translate(c.x,c.y);ctx.rotate(c.r);ctx.fillStyle=c.c;ctx.globalAlpha=Math.max(0,c.l/120);ctx.fillRect(-c.z/2,-c.z/4,c.z,c.z/2);ctx.restore()});conf=conf.filter(function(c){return c.l>0&&c.y<H+20})}
+ function burst(){var cs=['#f0b429','#2f5bea','#4fc58a','#ff7b6b','#6f93ff','#ffd27a'];conf=[];for(var i=0;i<90;i++)conf.push({x:W*.5+(Math.random()-.5)*80,y:H*.4,vx:(Math.random()-.5)*8,vy:-4-Math.random()*7,z:5+Math.random()*6,r:Math.random()*3,vr:(Math.random()-.5)*.3,c:cs[i%6],l:120})}
+ function draw(){var q=sc();ctx.clearRect(0,0,W,H);sky(q);if(q.sun)sun(q);
+  if(opts.mood==='Good'){var g=ctx.createRadialGradient(W*.8,H*.1,0,W*.8,H*.1,Math.max(W,H)*.6);g.addColorStop(0,'rgba(255,255,255,.55)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}
+  clouds.forEach(function(c){cloud(c,q);if(anim()){c.x+=q.sp*c.v;if(c.x>W+40)c.x=-c.s-40}});
+  rain(q);lightning(q);
+  var pr=prog();ctx.fillStyle='rgba(255,255,255,'+(.10*pr)+')';ctx.fillRect(0,0,W,H);
+  if(opts.dark){ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(0,0,W,H)}
+  if(pr>=1&&celeb<0){celeb=0;burst()}if(pr<1)celeb=-1;confetti()}
+ function frame(){t++;draw();raf=requestAnimationFrame(frame)}
+ function cancel(){if(raf){cancelAnimationFrame(raf);raf=0}}
+ function start(){cancel();if(anim())raf=requestAnimationFrame(frame);else draw()}
+ resize();start();
+ return{update:function(o){var ch=o.mood!==opts.mood;Object.assign(opts,o);if(ch)init()},resize:resize,start:start,cancel:cancel,destroy:cancel}}
 var BGON=true;try{BGON=localStorage.getItem('hexbg')!=='0'}catch(e){}
 var bgi=null,RMQ=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
 function isDark(){var a=document.documentElement.getAttribute('data-theme');return a?a==='dark':(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
@@ -908,8 +730,8 @@ document.addEventListener('change',function(e){var t=e.target,d=t.dataset;
  if(t.id==='born'){S.born=t.value;setBorn(t.value);save();draw();return}if(t.id==='sg'){S.sg=Math.max(30,num(t.value)||120);save();draw();return}if(t.id==='nt'){S.note[T]=t.value;save()}if(t.id==='ln'){S.learn[T]=t.value;save()}if(t.id==='pf'&&t.files[0]){var f=t.files[0],ent={id:Date.now(),n:f.name,s:Math.round(f.size/1024)};S.files[T]=(S.files[T]||[]).concat([ent]);save();if(S.driveUrl&&f.size<4e6){var fr=new FileReader();fr.onload=function(){PEND[ent.id]={name:f.name.replace(/[\/\\]/g,'_'),data:String(fr.result).split(',')[1]};upPdf(ent.id)};fr.readAsDataURL(f)}else draw()}});
 draw();
 document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='tdn'){var b=document.querySelector('[data-addtd]');if(b)b.click()}});
-document.addEventListener('input',function(e){var t=e.target;if(t.id==='nt'){S.note[T]=t.value;save();return}if(t.id==='ln'){S.learn[T]=t.value;save();return}var k=t.dataset&&t.dataset.sl;if(!k)return;var v=+t.value,mx=+t.max;if(k==='water'){S.water[T]=v;$('wl').textContent=v}else{S.study[T]=v;$('sl').textContent=v}t.style.setProperty('--v',(v/mx*100)+'%');save()});
-setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=function(o){for(var k in o){if(k!=='tab')S[k]=o[k]}setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.pays)S.pays=[];if(!S.todos)S.todos=[];var wasOld=S.mv!==5||S.sd!==3;migrate();migrate4();migrate5();seedTodos();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(wasOld)save();draw();setTimeout(autoDrive,1500)};
+document.addEventListener('input',function(e){var t=e.target;if(t.id==='fp'){S.plan=t.value;save();return}if(t.id==='nt'){S.note[T]=t.value;save();return}if(t.id==='ln'){S.learn[T]=t.value;save();return}var k=t.dataset&&t.dataset.sl;if(!k)return;var v=+t.value,mx=+t.max;if(k==='water'){S.water[T]=v;$('wl').textContent=v}else{S.study[T]=v;$('sl').textContent=v}t.style.setProperty('--v',(v/mx*100)+'%');save()});
+setTimeout(autoDrive,5000);window.hexGet=function(){return S};window.hexApply=function(o){for(var k in o){if(k!=='tab')S[k]=o[k]}setBorn(S.born);S.habits=HAB;if(!S.gd)S.gd=[];if(!S.gp)S.gp=[];if(!S.sg)S.sg=120;if(!S.files)S.files={};if(!S.ps)S.ps={};if(!S.proj)S.proj=0;if(!S.ideas)S.ideas=IDEAS;if(!S.ideaDone)S.ideaDone={};if(!S.pays)S.pays=[];if(!S.todos)S.todos=[];if(S.plan===undefined)S.plan=PLANTXT;var wasOld=S.mv!==5||S.sd!==3;migrate();migrate4();migrate5();seedTodos();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(wasOld)save();draw();setTimeout(autoDrive,1500)};
 })();
 </script>
 <div id="login"><div class="lbox"><div class="lt">⬡ Hex OS</div><p id="lmsg" class="small">Checking login…</p>
